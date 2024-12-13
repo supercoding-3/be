@@ -11,3 +11,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+jwt:
+  secret: ${SECRET_KEY}
+  access-token-expiration-time: ${ACCESS_TOKEN}
+  refresh-token-expiration-time: ${REFRESH_TOKEN}
