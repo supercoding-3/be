@@ -2,6 +2,8 @@ package com.github.p3.controller;
 
 import com.github.p3.dto.UserDto;
 import com.github.p3.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +34,30 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<String> login(@RequestBody UserDto userDto, HttpServletResponse response) {
         try {
             Map<String, String> tokens = userService.login(userDto.getUserEmail(), userDto.getUserPassword());
-            return new ResponseEntity<>(tokens, HttpStatus.OK);
+
+            // Access Token 쿠키 설정
+            Cookie accessTokenCookie = new Cookie("access_token", tokens.get("access_token"));
+            accessTokenCookie.setHttpOnly(true); // HTTP-Only
+            accessTokenCookie.setSecure(true); // 보안 적용
+            accessTokenCookie.setPath("/"); // 경로 설정
+            accessTokenCookie.setMaxAge(3600); // 60초 * 60분 = 1시간
+
+            // Refresh Token 쿠키 설정
+            Cookie refreshTokenCookie = new Cookie("refresh_token", tokens.get("refresh_token"));
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(604800); // 60초 * 60분 * 24시간 * 7일 = 7일
+
+            response.addCookie(accessTokenCookie);
+            response.addCookie(refreshTokenCookie);
+
+            return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
         } catch (RuntimeException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 }

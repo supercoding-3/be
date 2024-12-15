@@ -20,10 +20,12 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh-token-expiration-time}")
     private long refreshTokenExpirationTime;
 
+    // 액세스 토큰 생성
     public String generateAccessToken(String userEmail) {
         return generateToken(userEmail, accessTokenExpirationTime);
     }
 
+    // 리프래시 토큰 생성
     public String generateRefreshToken(String userEmail) {
         return generateToken(userEmail, refreshTokenExpirationTime);
     }
@@ -60,8 +62,6 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token); // 토큰 검증
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 만료되었거나 유효하지 않으면 예외 발생
-            System.out.println("토큰 유효성 검사 실패: " + e.getMessage());
             return false;
         }
     }

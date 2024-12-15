@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // JWT와 리프래시 토큰 생성
+        // JWT 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(userEmail);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userEmail);
 
