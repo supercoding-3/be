@@ -3,6 +3,7 @@ package com.github.p3.controller;
 import com.github.p3.dto.UserDto;
 import com.github.p3.service.UserService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class UserController {
             accessTokenCookie.setHttpOnly(true); // HTTP-Only
             accessTokenCookie.setSecure(true); // 보안 적용
             accessTokenCookie.setPath("/"); // 경로 설정
-            accessTokenCookie.setMaxAge(3600); // 60초 * 60분 = 1시간
+            accessTokenCookie.setMaxAge(86400); // 1일
 
             // Refresh Token 쿠키 설정
             Cookie refreshTokenCookie = new Cookie("refresh_token", tokens.get("refresh_token"));
@@ -59,5 +60,30 @@ public class UserController {
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        // Access Token 쿠키 만료
+        Cookie accessTokenCookie = new Cookie("access_token", null);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setPath("/");
+        response.addCookie(accessTokenCookie);
+        accessTokenCookie.setMaxAge(0); // 쿠키 만료 처리
+
+        // Refresh Token 쿠키 만료
+        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        response.addCookie(refreshTokenCookie);
+        refreshTokenCookie.setMaxAge(0);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
     }
 }

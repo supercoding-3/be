@@ -60,8 +60,4 @@ public class UserServiceImpl implements UserService {
 
         return tokens;
     }
-
-    // TODO: logout
-
-    // TODO: delete
 }
