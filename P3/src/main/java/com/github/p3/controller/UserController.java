@@ -3,15 +3,11 @@ package com.github.p3.controller;
 import com.github.p3.dto.UserDto;
 import com.github.p3.service.UserService;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -85,5 +81,16 @@ public class UserController {
         response.addCookie(refreshTokenCookie);
 
         return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
+    }
+
+    // 계정 비활성화
+    @PatchMapping("/deactivate")
+    public ResponseEntity<String> deactivateAccount(@RequestBody UserDto userDto) {
+        try {
+            userService.deactivateAccount(userDto.getUserEmail());
+            return new ResponseEntity<>("계정이 바활성화되었습니다.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

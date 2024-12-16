@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +26,23 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto signup(UserDto userDto) {
         // 이메일 중복 체크
-        if (userRepository.findByUserEmail(userDto.getUserEmail()).isPresent()) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+        Optional<User> existingUser = userRepository.findByUserEmail(userDto.getUserEmail());
+        if (existingUser.isPresent()) {
+            if (existingUser.get().getUserIsDeleted()) {
+                throw new RuntimeException("이 이메일은 비활성화된 계정입니다. 계정을 복구하거나 다른 이메일을 사용하세요.");
+            } else {
+                throw new RuntimeException("이미 사용 중인 이메일입니다.");
+            }
         }
+
         // 닉네임 중복 체크
-        if (userRepository.findByUserNickname(userDto.getUserNickname()).isPresent()) {
-            throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+        Optional<User> existingNickname = userRepository.findByUserNickname(userDto.getUserNickname());
+        if (existingNickname.isPresent()) {
+            if (existingNickname.get().getUserIsDeleted()) {
+                throw new RuntimeException("이 닉네임은 이미 비활성화된 계정으로 존재합니다. 계정을 복구하거나 다른 닉네임을 사용하세요.");
+            } else {
+                throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+            }
         }
 
         User user = userMapper.toUserEntity(userDto);
@@ -44,6 +56,11 @@ public class UserServiceImpl implements UserService {
     public Map<String, String> login(String userEmail, String userPassword) {
         // 이메일로 사용자 조회
         User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+
+        // 비활성화된 계정 체크
+        if (user.getUserIsDeleted()) {
+            throw new RuntimeException("비활성화된 계정입니다. 계정을 복구하거나 다른 이메일을 사용하세요.");
+        }
         // 비밀번호 확인
         if (!passwordEncoder.matches(userPassword, user.getUserPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
@@ -59,5 +76,18 @@ public class UserServiceImpl implements UserService {
         tokens.put("refresh_token", refreshToken);
 
         return tokens;
+    }
+
+    @Override
+    @Transactional
+    public void deactivateAccount(String userEmail) {
+        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+
+        if (user.getUserIsDeleted()) {
+            throw new RuntimeException("이미 비활성화된 계정입니다.");
+        }
+
+        user.setUserIsDeleted(true);
+        userRepository.save(user);
     }
 }

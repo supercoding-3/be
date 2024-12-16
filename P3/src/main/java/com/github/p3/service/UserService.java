@@ -9,4 +9,6 @@ public interface UserService {
     UserDto signup(UserDto userDto);
 
     Map<String, String> login(String userEmail, String userPassword);
+
+    void deactivateAccount(String userEmail);
 }

@@ -11,5 +11,6 @@ public class UserDto {
     private String userPassword;
     private String userNickname;
     private String userPhone;
+    private Boolean userIsDeleted;
 
 }
