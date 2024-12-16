@@ -9,6 +9,7 @@ public class UserDto {
 
     private String userEmail;
     private String userPassword;
+    private String userPasswordConfirm;
     private String userNickname;
     private String userPhone;
     private Boolean userIsDeleted;
