@@ -87,7 +87,7 @@ public class UserController {
     @PatchMapping("/deactivate")
     public ResponseEntity<String> deactivateAccount(@RequestBody UserDto userDto) {
         try {
-            userService.deactivateAccount(userDto.getUserEmail());
+            userService.deactivateAccount(userDto.getUserEmail(), userDto.getUserPassword());
             return new ResponseEntity<>("계정이 비활성화되었습니다.", HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

@@ -80,11 +80,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deactivateAccount(String userEmail) {
+    public void deactivateAccount(String userEmail, String userPassword) {
         User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
 
         if (user.getUserIsDeleted()) {
             throw new RuntimeException("이미 비활성화된 계정입니다.");
+        }
+
+        if (!passwordEncoder.matches(userPassword, user.getUserPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
         user.setUserIsDeleted(true);

@@ -10,5 +10,5 @@ public interface UserService {
 
     Map<String, String> login(String userEmail, String userPassword);
 
-    void deactivateAccount(String userEmail);
+    void deactivateAccount(String userEmail, String userPassword);
 }
