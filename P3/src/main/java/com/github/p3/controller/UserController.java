@@ -88,7 +88,7 @@ public class UserController {
     public ResponseEntity<String> deactivateAccount(@RequestBody UserDto userDto) {
         try {
             userService.deactivateAccount(userDto.getUserEmail());
-            return new ResponseEntity<>("계정이 바활성화되었습니다.", HttpStatus.OK);
+            return new ResponseEntity<>("계정이 비활성화되었습니다.", HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
