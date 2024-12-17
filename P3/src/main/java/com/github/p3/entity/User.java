@@ -42,5 +42,8 @@ public class User {
     @Column(name = "user_is_deleted", nullable = false)
     private Boolean userIsDeleted = false;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private RefreshToken refreshToken;
+
 }
 
