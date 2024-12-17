@@ -25,10 +25,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto signup(UserDto userDto) {
-        // 비밀번호 확인
-        if (!userDto.getUserPassword().equals(userDto.getUserPasswordConfirm())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
-        }
 
         // 이메일 중복 체크
         Optional<User> existingUser = userRepository.findByUserEmail(userDto.getUserEmail());
