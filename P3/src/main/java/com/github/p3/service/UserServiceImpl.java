@@ -25,6 +25,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto signup(UserDto userDto) {
+        // 이메일 형식 검증
+        if (!UserServiceRegexImpl.isValidEmail(userDto.getUserEmail())) {
+            throw new IllegalArgumentException("잘못된 이메일 형식입니다.");
+        }
+
+        // 닉네임 형식 검증
+        if (!UserServiceRegexImpl.isValidNickname(userDto.getUserNickname())) {
+            throw new IllegalArgumentException("닉네임은 2~10자, 한글, 영문 또는 숫자를 포함해야 합니다.");
+        }
+
+        // 비밀번호 형식 검증
+        if (!UserServiceRegexImpl.isValidPassword(userDto.getUserPassword())) {
+            throw new IllegalArgumentException("비밀번호는 8~20자, 영문 대소문자 중 하나와 숫자를 포함해야 합니다.");
+        }
 
         // 이메일 중복 체크
         Optional<User> existingUser = userRepository.findByUserEmail(userDto.getUserEmail());
