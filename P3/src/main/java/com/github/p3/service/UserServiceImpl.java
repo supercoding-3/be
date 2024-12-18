@@ -7,11 +7,14 @@ import com.github.p3.mapper.UserMapper;
 import com.github.p3.repository.RefreshTokenRepository;
 import com.github.p3.repository.UserRepository;
 import com.github.p3.security.JwtTokenProvider;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -113,6 +116,21 @@ public class UserServiceImpl implements UserService {
             newToken.setUser(user);
             newToken.setRefreshToken(refreshToken);
             refreshTokenRepository.save(newToken);
+        }
+    }
+
+    @Override
+    public void removeRefreshToken(HttpServletRequest request) {
+        String accessToken = Arrays.stream(request.getCookies())
+                .filter(cookie -> "access_token".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (accessToken != null) {
+            String userEmail = jwtTokenProvider.extractUserEmail(accessToken);
+            User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+            refreshTokenRepository.deleteByUser(user);
         }
     }
 

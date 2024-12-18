@@ -3,6 +3,7 @@ package com.github.p3.controller;
 import com.github.p3.dto.UserDto;
 import com.github.p3.service.UserService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,27 +58,28 @@ public class UserController {
     }
 
     // TODO: 로그아웃
-//    @PostMapping("/logout")
-//    public ResponseEntity<String> logout(HttpServletResponse response) {
-//        // Access Token 쿠키 만료
-//        Cookie accessTokenCookie = new Cookie("access_token", null);
-//        accessTokenCookie.setHttpOnly(true);
-//        accessTokenCookie.setPath("/");
-//        response.addCookie(accessTokenCookie);
-//        accessTokenCookie.setMaxAge(0); // 쿠키 만료 처리
-//
-//        // Refresh Token 쿠키 만료
-//        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
-//        refreshTokenCookie.setHttpOnly(true);
-//        refreshTokenCookie.setPath("/");
-//        response.addCookie(refreshTokenCookie);
-//        refreshTokenCookie.setMaxAge(0);
-//
-//        response.addCookie(accessTokenCookie);
-//        response.addCookie(refreshTokenCookie);
-//
-//        return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
-//    }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        // Access Token 쿠키 만료
+        Cookie accessTokenCookie = new Cookie("access_token", null);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(0); // 쿠키 만료 설정
+        // Refresh Token 쿠키 만료
+        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(0); // 쿠키 만료 설정
+
+        // 쿠키를 응답에 추가하여 클라이언트에서 쿠키 삭제
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        // DB에서 리프래시 토큰 삭제
+        userService.removeRefreshToken(request);
+
+        return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
+    }
 
     // 계정 비활성화
     @PatchMapping("/deactivate")
