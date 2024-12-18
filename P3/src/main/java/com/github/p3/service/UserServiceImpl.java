@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
             token.setRefreshToken(refreshToken); // 리프래시 토큰 값 갱신
             token.setCreatedAt(LocalDateTime.now());
             token.setExpiresAt(LocalDateTime.now().plusDays(7)); // 만료일 갱신
-            refreshTokenRepository.flush();
+            refreshTokenRepository.save(token);
         } else {
             // 새로운 리프래시 토큰 저장
             RefreshToken newToken = new RefreshToken();
@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
             newToken.setRefreshToken(refreshToken);
             newToken.setCreatedAt(LocalDateTime.now()); // 생성일 설정
             newToken.setExpiresAt(LocalDateTime.now().plusDays(7)); // 만료일 설정
-            refreshTokenRepository.flush();
+            refreshTokenRepository.save(newToken);
         }
     }
 
