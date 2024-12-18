@@ -9,8 +9,14 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
+
+  security:
+    user:
+      name: admin
+      password: admin123
 
 jwt:
   secret: ${SECRET_KEY}

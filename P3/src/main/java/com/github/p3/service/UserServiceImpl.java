@@ -26,7 +26,6 @@ public class UserServiceImpl implements UserService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
-    @Transactional
     public UserDto signup(UserDto userDto) {
         // 이메일 형식 검증
         if (!UserServiceRegexImpl.isValidEmail(userDto.getUserEmail())) {
@@ -101,15 +100,20 @@ public class UserServiceImpl implements UserService {
         // 사용자 조회
         User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
 
-        // 기존 리프래시 토큰이 있는 경우 삭제
+        // 기존 리프래시 토큰이 있는 경우 업데이트
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByUser(user);
-        existingToken.ifPresent(refreshTokenRepository::delete);
-
-        // 새로운 리프래시 토큰 저장
-        RefreshToken token = new RefreshToken();
-        token.setUser(user);
-        token.setRefreshToken(refreshToken);
-        refreshTokenRepository.save(token);
+        if (existingToken.isPresent()) {
+            // 기존 리프래시 토큰 업데이트
+            RefreshToken token = existingToken.get();
+            token.setRefreshToken(refreshToken);
+            refreshTokenRepository.save(token);
+        } else {
+            // 새로운 리프래시 토큰 저장
+            RefreshToken newToken = new RefreshToken();
+            newToken.setUser(user);
+            newToken.setRefreshToken(refreshToken);
+            refreshTokenRepository.save(newToken);
+        }
     }
 
     @Override

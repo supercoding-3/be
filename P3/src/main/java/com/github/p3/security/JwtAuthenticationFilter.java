@@ -23,6 +23,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
+        // 회원가입 요청은 토큰 검사 안함
+        if (request.getRequestURI().equals("/api/user/signup")) {
+            filterChain.doFilter(request, response);  // 회원가입이면 필터를 건너뛰고 그대로 진행
+            return;
+        }
+
         try {
             String token = getTokenFromCookies(request);
 
@@ -50,3 +56,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
+

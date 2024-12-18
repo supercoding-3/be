@@ -56,28 +56,28 @@ public class UserController {
         }
     }
 
-    // 로그아웃
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response) {
-        // Access Token 쿠키 만료
-        Cookie accessTokenCookie = new Cookie("access_token", null);
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setPath("/");
-        response.addCookie(accessTokenCookie);
-        accessTokenCookie.setMaxAge(0); // 쿠키 만료 처리
-
-        // Refresh Token 쿠키 만료
-        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setPath("/");
-        response.addCookie(refreshTokenCookie);
-        refreshTokenCookie.setMaxAge(0);
-
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
-
-        return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
-    }
+    // TODO: 로그아웃
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logout(HttpServletResponse response) {
+//        // Access Token 쿠키 만료
+//        Cookie accessTokenCookie = new Cookie("access_token", null);
+//        accessTokenCookie.setHttpOnly(true);
+//        accessTokenCookie.setPath("/");
+//        response.addCookie(accessTokenCookie);
+//        accessTokenCookie.setMaxAge(0); // 쿠키 만료 처리
+//
+//        // Refresh Token 쿠키 만료
+//        Cookie refreshTokenCookie = new Cookie("refresh_token", null);
+//        refreshTokenCookie.setHttpOnly(true);
+//        refreshTokenCookie.setPath("/");
+//        response.addCookie(refreshTokenCookie);
+//        refreshTokenCookie.setMaxAge(0);
+//
+//        response.addCookie(accessTokenCookie);
+//        response.addCookie(refreshTokenCookie);
+//
+//        return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
+//    }
 
     // 계정 비활성화
     @PatchMapping("/deactivate")
