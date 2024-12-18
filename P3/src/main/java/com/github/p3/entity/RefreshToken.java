@@ -2,7 +2,7 @@ package com.github.p3.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "refresh_tokens")
+@Slf4j
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +25,7 @@ public class RefreshToken {
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "expires_at")
@@ -37,5 +37,11 @@ public class RefreshToken {
         if (expiresAt == null) {
             this.expiresAt = LocalDateTime.now().plusDays(7); // 현재 시간 기준 7일 후
         }
+    }
+
+    // RefreshToken 갱신 시 createdAt 갱신
+    @PreUpdate
+    public void updateCreatedAt() {
+        this.createdAt = LocalDateTime.now();
     }
 }

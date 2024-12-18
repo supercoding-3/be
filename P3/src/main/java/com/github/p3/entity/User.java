@@ -43,6 +43,7 @@ public class User {
     private Boolean userIsDeleted = false;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @ToString.Exclude // 순환 참조 방지
     private RefreshToken refreshToken;
 
 }

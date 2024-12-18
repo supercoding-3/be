@@ -11,9 +11,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -99,7 +102,8 @@ public class UserServiceImpl implements UserService {
         return tokens;
     }
 
-    private void saveRefreshToken(String userEmail, String refreshToken) {
+    @Transactional
+    public void saveRefreshToken(String userEmail, String refreshToken) {
         // 사용자 조회
         User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
 
@@ -108,14 +112,18 @@ public class UserServiceImpl implements UserService {
         if (existingToken.isPresent()) {
             // 기존 리프래시 토큰 업데이트
             RefreshToken token = existingToken.get();
-            token.setRefreshToken(refreshToken);
-            refreshTokenRepository.save(token);
+            token.setRefreshToken(refreshToken); // 리프래시 토큰 값 갱신
+            token.setCreatedAt(LocalDateTime.now());
+            token.setExpiresAt(LocalDateTime.now().plusDays(7)); // 만료일 갱신
+            refreshTokenRepository.flush();
         } else {
             // 새로운 리프래시 토큰 저장
             RefreshToken newToken = new RefreshToken();
             newToken.setUser(user);
             newToken.setRefreshToken(refreshToken);
-            refreshTokenRepository.save(newToken);
+            newToken.setCreatedAt(LocalDateTime.now()); // 생성일 설정
+            newToken.setExpiresAt(LocalDateTime.now().plusDays(7)); // 만료일 설정
+            refreshTokenRepository.flush();
         }
     }
 
