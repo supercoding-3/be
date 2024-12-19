@@ -36,13 +36,20 @@ public class S3Service {
         return imageUrls;
     }
 
-    // 파일을 S3에 업로드하고 URL을 반환하는 메서드
     private String uploadFileToS3(MultipartFile file) {
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename(); // 파일명에 타임스탬프 추가
+        // 고유한 파일 이름 생성
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
         try {
+            // ObjectMetadata 설정
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize()); // 파일 크기 설정
+            metadata.setContentType(file.getContentType()); // 파일 타입 설정 (선택 사항)
+
             // S3에 파일 업로드
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), new ObjectMetadata()));
-            // 업로드한 파일의 URL 생성
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
+
+            // 업로드한 파일의 URL 반환
             return amazonS3.getUrl(bucketName, fileName).toString();
         } catch (IOException e) {
             log.error("Error uploading file to S3", e);
