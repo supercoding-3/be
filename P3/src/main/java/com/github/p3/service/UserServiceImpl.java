@@ -25,6 +25,21 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto signup(UserDto userDto) {
+        // 이메일 형식 검증
+        if (!UserServiceRegexImpl.isValidEmail(userDto.getUserEmail())) {
+            throw new IllegalArgumentException("잘못된 이메일 형식입니다.");
+        }
+
+        // 닉네임 형식 검증
+        if (!UserServiceRegexImpl.isValidNickname(userDto.getUserNickname())) {
+            throw new IllegalArgumentException("닉네임은 2~10자, 한글, 영문 또는 숫자를 포함해야 합니다.");
+        }
+
+        // 비밀번호 형식 검증
+        if (!UserServiceRegexImpl.isValidPassword(userDto.getUserPassword())) {
+            throw new IllegalArgumentException("비밀번호는 8~20자, 영문 대소문자 중 하나와 숫자를 포함해야 합니다.");
+        }
+
         // 이메일 중복 체크
         Optional<User> existingUser = userRepository.findByUserEmail(userDto.getUserEmail());
         if (existingUser.isPresent()) {
@@ -80,14 +95,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deactivateAccount(String userEmail) {
+    public void deactivateAccount(String userEmail, String userPassword) {
         User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
 
         if (user.getUserIsDeleted()) {
             throw new RuntimeException("이미 비활성화된 계정입니다.");
         }
 
+        if (!passwordEncoder.matches(userPassword, user.getUserPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+
         user.setUserIsDeleted(true);
         userRepository.save(user);
     }
+
+    @Override
+    public User findById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));  // User가 없으면 예외 발생
+    }
+
 }

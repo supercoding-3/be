@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -41,6 +43,9 @@ public class User {
 
     @Column(name = "user_is_deleted", nullable = false)
     private Boolean userIsDeleted = false;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 
 }
 

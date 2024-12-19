@@ -2,25 +2,14 @@ package com.github.p3.mapper;
 
 import com.github.p3.dto.UserDto;
 import com.github.p3.entity.User;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class UserMapper {
-    public User toUserEntity(UserDto userDto) {
-        User user = new User();
-        user.setUserEmail(userDto.getUserEmail());
-        user.setUserPassword(userDto.getUserPassword());
-        user.setUserNickname(userDto.getUserNickname());
-        user.setUserPhone(userDto.getUserPhone());
-        return user;
-    }
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+    @Mapping(target = "userIsDeleted", source = "userIsDeleted", defaultValue = "false")
+    UserDto toUserDto(User user);
 
-    public UserDto toUserDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setUserEmail(user.getUserEmail());
-        userDto.setUserPassword(user.getUserPassword());
-        userDto.setUserNickname(user.getUserNickname());
-        userDto.setUserPhone(user.getUserPhone());
-        return userDto;
-    }
+    @Mapping(target = "userIsDeleted", source = "userIsDeleted", defaultValue = "false")
+    User toUserEntity(UserDto userDto);
 }

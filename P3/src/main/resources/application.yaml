@@ -12,7 +12,25 @@ spring:
     hibernate:
       ddl-auto: update
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 jwt:
   secret: ${SECRET_KEY}
   access-token-expiration-time: ${ACCESS_TOKEN}
   refresh-token-expiration-time: ${REFRESH_TOKEN}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${ACCESS_KEY}
+      secret-key: ${SECRET_KEY2}
+    s3:
+      bucket: p3-bucket-1
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false

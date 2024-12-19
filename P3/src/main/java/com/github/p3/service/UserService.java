@@ -1,6 +1,7 @@
 package com.github.p3.service;
 
 import com.github.p3.dto.UserDto;
+import com.github.p3.entity.User;
 
 import java.util.Map;
 
@@ -10,5 +11,7 @@ public interface UserService {
 
     Map<String, String> login(String userEmail, String userPassword);
 
-    void deactivateAccount(String userEmail);
+    void deactivateAccount(String userEmail, String userPassword);
+
+    User findById(Integer userId);
 }

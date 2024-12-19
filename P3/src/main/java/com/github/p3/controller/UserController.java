@@ -20,12 +20,19 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> signup(@RequestBody UserDto userDto) {
-        try{
+    public ResponseEntity<?> signup(@RequestBody UserDto userDto) {
+        try {
             UserDto createdUser = userService.signup(userDto);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // 잘못된 입력 데이터 예외 처리
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            // 비즈니스 로직 예외 처리 (예: 중복 이메일, 닉네임 등)
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            // 기타 서버 오류
+            return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -87,8 +94,8 @@ public class UserController {
     @PatchMapping("/deactivate")
     public ResponseEntity<String> deactivateAccount(@RequestBody UserDto userDto) {
         try {
-            userService.deactivateAccount(userDto.getUserEmail());
-            return new ResponseEntity<>("계정이 바활성화되었습니다.", HttpStatus.OK);
+            userService.deactivateAccount(userDto.getUserEmail(), userDto.getUserPassword());
+            return new ResponseEntity<>("계정이 비활성화되었습니다.", HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
