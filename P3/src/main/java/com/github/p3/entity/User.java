@@ -7,11 +7,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "users")
 public class User {
 
@@ -43,5 +42,8 @@ public class User {
     @Column(name = "user_is_deleted", nullable = false)
     private Boolean userIsDeleted = false;
 
-}
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @ToString.Exclude // 순환 참조 방지
+    private RefreshToken refreshToken;
 
+}
