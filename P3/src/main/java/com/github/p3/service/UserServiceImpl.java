@@ -3,6 +3,8 @@ package com.github.p3.service;
 import com.github.p3.dto.UserDto;
 import com.github.p3.entity.RefreshToken;
 import com.github.p3.entity.User;
+import com.github.p3.exception.CustomException;
+import com.github.p3.exception.ErrorCode;
 import com.github.p3.mapper.UserMapper;
 import com.github.p3.repository.RefreshTokenRepository;
 import com.github.p3.repository.UserRepository;
@@ -35,26 +37,26 @@ public class UserServiceImpl implements UserService {
     public UserDto signup(UserDto userDto) {
         // 이메일 형식 검증
         if (!UserServiceRegexImpl.isValidEmail(userDto.getUserEmail())) {
-            throw new IllegalArgumentException("잘못된 이메일 형식입니다.");
+            throw new CustomException(ErrorCode.INVALID_EMAIL);
         }
 
         // 닉네임 형식 검증
         if (!UserServiceRegexImpl.isValidNickname(userDto.getUserNickname())) {
-            throw new IllegalArgumentException("닉네임은 2~10자, 한글, 영문 또는 숫자를 포함해야 합니다.");
+            throw new CustomException(ErrorCode.INVALID_NICKNAME);
         }
 
         // 비밀번호 형식 검증
         if (!UserServiceRegexImpl.isValidPassword(userDto.getUserPassword())) {
-            throw new IllegalArgumentException("비밀번호는 8~20자, 영문 대소문자 중 하나와 숫자를 포함해야 합니다.");
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
         // 이메일 중복 체크
         Optional<User> existingUser = userRepository.findByUserEmail(userDto.getUserEmail());
         if (existingUser.isPresent()) {
             if (existingUser.get().getUserIsDeleted()) {
-                throw new RuntimeException("이 이메일은 비활성화된 계정입니다. 계정을 복구하거나 다른 이메일을 사용하세요.");
+                throw new CustomException(ErrorCode.ACCOUNT_DEACTIVATED);
             } else {
-                throw new RuntimeException("이미 사용 중인 이메일입니다.");
+                throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
             }
         }
 
@@ -62,9 +64,9 @@ public class UserServiceImpl implements UserService {
         Optional<User> existingNickname = userRepository.findByUserNickname(userDto.getUserNickname());
         if (existingNickname.isPresent()) {
             if (existingNickname.get().getUserIsDeleted()) {
-                throw new RuntimeException("이 닉네임은 이미 비활성화된 계정으로 존재합니다. 계정을 복구하거나 다른 닉네임을 사용하세요.");
+                throw new CustomException(ErrorCode.ACCOUNT_DEACTIVATED);
             } else {
-                throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+                throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
             }
         }
 
@@ -78,15 +80,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Map<String, String> login(String userEmail, String userPassword) {
         // 이메일로 사용자 조회
-        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
 
         // 비활성화된 계정 체크
         if (user.getUserIsDeleted()) {
-            throw new RuntimeException("비활성화된 계정입니다. 계정을 복구하거나 다른 이메일을 사용하세요.");
+            throw new CustomException(ErrorCode.ACCOUNT_DEACTIVATED);
         }
         // 비밀번호 확인
         if (!passwordEncoder.matches(userPassword, user.getUserPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
         }
 
         // JWT 토큰 생성
@@ -105,7 +108,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void saveRefreshToken(String userEmail, String refreshToken) {
         // 사용자 조회
-        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
 
         // 기존 리프래시 토큰이 있는 경우 업데이트
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByUser(user);
@@ -137,7 +141,7 @@ public class UserServiceImpl implements UserService {
 
         if (accessToken != null) {
             String userEmail = jwtTokenProvider.extractUserEmail(accessToken);
-            User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+            User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
             refreshTokenRepository.deleteByUser(user);
         }
     }
@@ -145,15 +149,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deactivateAccount(String userEmail, String userPassword) {
-        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+        User user = userRepository.findByUserEmail(userEmail).orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
 
         if (user.getUserIsDeleted()) {
             refreshTokenRepository.deleteByUser(user);
-            throw new RuntimeException("이미 비활성화된 계정입니다.");
+            throw new CustomException(ErrorCode.ACCOUNT_DEACTIVATED);
         }
 
         if (!passwordEncoder.matches(userPassword, user.getUserPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
         }
 
         user.setUserIsDeleted(true);
