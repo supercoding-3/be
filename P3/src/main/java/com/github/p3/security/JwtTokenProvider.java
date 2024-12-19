@@ -66,4 +66,16 @@ public class JwtTokenProvider {
         }
     }
 
+    // 리프래시 토큰으로 액세스 토큰 갱신
+    public String refreshAccessToken(String refreshToken) {
+        // 리프래시 토큰 검증
+        if (!validateToken(refreshToken)) {
+            throw new RuntimeException("무효한 refresh token 입니다.");
+        }
+        // 리프래시 토큰에서 사용자 이메일 추출
+        String userEmail = extractUserEmail(refreshToken);
+        // 새로운 액세스 토큰 발급
+        return generateAccessToken(userEmail);
+    }
+
 }
