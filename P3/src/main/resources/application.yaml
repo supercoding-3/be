@@ -9,7 +9,34 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
-    show-sql: true
-    open-in-view: false
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  security:
+    user:
+      name: admin
+      password: admin123
+
+jwt:
+  secret: ${SECRET_KEY}
+  access-token-expiration-time: ${ACCESS_TOKEN}
+  refresh-token-expiration-time: ${REFRESH_TOKEN}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${ACCESS_KEY}
+      secret-key: ${SECRET_KEY2}
+    s3:
+      bucket: p3-bucket-1
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
