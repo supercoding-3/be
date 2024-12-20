@@ -18,7 +18,6 @@ public class ProductRegisterDto {
     private BigDecimal startingBidPrice;
     private BigDecimal immediatePrice;
     private Category category; // enum 타입
-    private Integer userId;
     private List<MultipartFile> images; // 이미지를 MultipartFile로 받음
     private LocalDateTime productEndDate;
 

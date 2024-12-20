@@ -62,6 +62,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token); // 토큰 검증
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("토큰 검증 오류: " + e.getMessage());
             return false;
         }
     }
