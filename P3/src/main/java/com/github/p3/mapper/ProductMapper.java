@@ -13,13 +13,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    // ProductRegisterDto -> Product 변환
-    @Mapping(source = "userId", target = "user")
-    Product toEntity(ProductRegisterDto productRegisterDto, @Context UserRepository userRepository);
+    Product toEntity(ProductRegisterDto productRegisterDto);
 
-    // Integer userId -> User 변환
-    default User map(Integer userId, @Context UserRepository userRepository) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
 }
