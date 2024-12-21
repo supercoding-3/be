@@ -1,5 +1,6 @@
 package com.github.p3.controller;
 
+import com.github.p3.dto.ProductDetailResponseDto;
 import com.github.p3.dto.ProductRegisterDto;
 import com.github.p3.dto.ProductResponseDto;
 import com.github.p3.entity.Product;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.github.p3.entity.Image;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -29,6 +32,14 @@ public class ProductController {
     private final S3Service s3Service;
 
 
+    @GetMapping("/register")
+    public ResponseEntity<Map<String, String>> showProductRegisterPage() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "상품 등록 페이지로 이동합니다.");
+        return ResponseEntity.ok(response);
+    }
+
+
     @PostMapping("/register")
     public ResponseEntity<String> registerProduct(@RequestPart("product") ProductRegisterDto productRegisterDto,
                                                   @RequestPart(value = "images", required = false) List<MultipartFile> images) {
@@ -39,5 +50,11 @@ public class ProductController {
         productService.registerProduct(productRegisterDto, imageUrls);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("판매 등록이 완료되었습니다.");
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId) {
+        ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
+        return ResponseEntity.ok(productDetail);
     }
 }

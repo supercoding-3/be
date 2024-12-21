@@ -1,5 +1,6 @@
 package com.github.p3.service;
 
+import com.github.p3.dto.ProductDetailResponseDto;
 import com.github.p3.dto.ProductRegisterDto;
 import com.github.p3.entity.Image;
 import com.github.p3.entity.Product;
@@ -52,6 +53,11 @@ public class ProductServiceImpl implements ProductService {
             image.setImageUrl(imageUrl); // 이미지 URL 설정
             imageRepository.save(image); // 이미지 저장
         }
+    }
+
+    @Override
+    public ProductDetailResponseDto getProductDetail(Long productId) {
+        return null;
     }
 
 
