@@ -1,5 +1,6 @@
 package com.github.p3.service;
 
+import com.github.p3.dto.ProductAllDto;
 import com.github.p3.dto.ProductDetailResponseDto;
 import com.github.p3.dto.ProductRegisterDto;
 import com.github.p3.entity.Bid;
@@ -17,11 +18,13 @@ import com.github.p3.repository.UserRepository;
 import com.github.p3.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -87,6 +90,14 @@ public class ProductServiceImpl implements ProductService {
 
 
         return productDetailMapper.toDtoWithAdditionalFields(product, imageUrls, latestBid, isSeller);
+    }
+
+    @Override
+    public List<ProductAllDto> getAllProducts() {
+        // 모든 상품을 조회하고, DTO로 변환
+        return productRepository.findAll().stream()
+                .map(productMapper::toProductAllDto)
+                .collect(Collectors.toList());
     }
 
 
