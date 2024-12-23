@@ -1,12 +1,10 @@
 package com.github.p3.service;
 
+import com.github.p3.dto.CategoryDto;
 import com.github.p3.dto.ProductAllDto;
 import com.github.p3.dto.ProductDetailResponseDto;
 import com.github.p3.dto.ProductRegisterDto;
-import com.github.p3.entity.Bid;
-import com.github.p3.entity.Image;
-import com.github.p3.entity.Product;
-import com.github.p3.entity.User;
+import com.github.p3.entity.*;
 import com.github.p3.exception.CustomException;
 import com.github.p3.exception.ErrorCode;
 import com.github.p3.mapper.ProductDetailMapper;
@@ -109,6 +107,15 @@ public class ProductServiceImpl implements ProductService {
         // 이메일로 사용자 조회
         return userRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+    }
+
+    // 카테고리별 상품 조회
+    @Override
+    @Transactional
+    public List<CategoryDto> getProductsByCategory(Category category) {
+        return productRepository.findByCategory(category).stream()
+                .map(productMapper::toCategoryDto)  // MapStruct를 사용하여 변환
+                .collect(Collectors.toList());
     }
 }
 
