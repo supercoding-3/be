@@ -1,1 +1,8 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
 
+  datasource:
+    url: jdbc:mariadb://supercoding-p3.cx00oo0eeajx.ap-northeast-2.rds.amazonaws.com:3306/p3?useUnicode=true&characterEncoding=UTF-8
+    driver-class-name: org.mariadb.jdbc.Driver
