@@ -2,16 +2,20 @@ package com.github.p3.service;
 
 import com.github.p3.dto.ProductDetailResponseDto;
 import com.github.p3.dto.ProductRegisterDto;
+import com.github.p3.entity.Bid;
 import com.github.p3.entity.Image;
 import com.github.p3.entity.Product;
 import com.github.p3.entity.User;
 import com.github.p3.exception.CustomException;
 import com.github.p3.exception.ErrorCode;
+import com.github.p3.mapper.ProductDetailMapper;
 import com.github.p3.mapper.ProductMapper;
+import com.github.p3.repository.BidRepository;
 import com.github.p3.repository.ImageRepository;
 import com.github.p3.repository.ProductRepository;
 import com.github.p3.repository.UserRepository;
 import com.github.p3.security.JwtTokenProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -29,7 +33,11 @@ public class ProductServiceImpl implements ProductService {
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final BidRepository bidRepository;
+    private final ProductDetailMapper productDetailMapper;
 
+    @Override
+    @Transactional
     public void registerProduct(ProductRegisterDto productRegisterDto, List<String> imageUrls) {       // 엑세스 토큰을 통해 인증된 사용자 정보 가져오기
         // SecurityContext에서 인증된 사용자 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -56,8 +64,29 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDetailResponseDto getProductDetail(Long productId) {
-        return null;
+        // 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 현재 인증된 사용자 정보 가져오기
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+        // 현재 사용자가 판매자인지 여부 확인
+        boolean isSeller = product.getUser().getUserEmail().equals(userEmail);
+
+        // 최신 입찰 조회
+        Bid latestBid = bidRepository.findTopByProductProductIdOrderByBidCreatedAtDesc(productId).orElse(null);
+
+        // 상품에 속한 이미지 조회
+        List<String> imageUrls = product.getImages().stream()
+                .map(Image::getImageUrl)
+                .toList();
+
+
+        return productDetailMapper.toDtoWithAdditionalFields(product, imageUrls, latestBid, isSeller);
     }
 
 
