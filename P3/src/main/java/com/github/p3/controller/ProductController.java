@@ -59,8 +59,12 @@ public class ProductController {
         return ResponseEntity.ok(productDetail);
     }
 
-//    @GetMapping("/all")
-//    public ResponseEntity<List<ProductAllDto>> getAllProducts() {
-//
-//    }
+    @GetMapping("/all")
+    public ResponseEntity<List<ProductAllDto>> getAllProducts() {
+        // 서비스에서 상품 목록을 가져옴
+        List<ProductAllDto> products = productService.getAllProducts();
+
+        // ResponseEntity로 감싸서 반환
+        return ResponseEntity.ok(products); // 200 OK 상태 코드와 함께 반환
+    }
 }
