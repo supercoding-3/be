@@ -1,5 +1,6 @@
 package com.github.p3.controller;
 
+import com.github.p3.dto.ProductAllDto;
 import com.github.p3.dto.ProductDetailResponseDto;
 import com.github.p3.dto.ProductRegisterDto;
 import com.github.p3.dto.ProductResponseDto;
@@ -52,9 +53,14 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body("판매 등록이 완료되었습니다.");
     }
 
-    @GetMapping("/products/{id}")
-    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable Long productId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable("id") Long productId) {
         ProductDetailResponseDto productDetail = productService.getProductDetail(productId);
         return ResponseEntity.ok(productDetail);
     }
+
+//    @GetMapping("/all")
+//    public ResponseEntity<List<ProductAllDto>> getAllProducts() {
+//
+//    }
 }

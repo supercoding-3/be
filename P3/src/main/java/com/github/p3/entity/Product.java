@@ -59,5 +59,9 @@ public class Product {
     // 이미지 리스트 (Image 엔티티와의 관계)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>(); // 여러 이미지를 관리할 수 있는 필드
+
+    // 입찰 리스트 (Bid 엔티티와의 관계)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bid> bids = new ArrayList<>(); // 상품에 대한 모든 입찰
 }
 
