@@ -18,6 +18,7 @@ public interface ProductMapper {
 
     @Mapping(target = "img", expression = "java(product.getImages().isEmpty() ? null : product.getImages().get(0).getImageUrl())") // 첫 번째 이미지 URL을 img에 매핑
     @Mapping(target = "category", expression = "java(product.getCategory().name())") // Category enum을 String으로 변환
+    @Mapping(target = "price", expression = "java(product.getHighestBidPrice() != null ? product.getHighestBidPrice() : product.getImmediatePrice())")
     ProductAllDto toProductAllDto(Product product);
 
 }

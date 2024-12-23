@@ -93,6 +93,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public List<ProductAllDto> getAllProducts() {
         // 모든 상품을 조회하고, DTO로 변환
         return productRepository.findAll().stream()
