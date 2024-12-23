@@ -1,9 +1,7 @@
 package com.github.p3.controller;
 
-import com.github.p3.dto.ProductAllDto;
-import com.github.p3.dto.ProductDetailResponseDto;
-import com.github.p3.dto.ProductRegisterDto;
-import com.github.p3.dto.ProductResponseDto;
+import com.github.p3.dto.*;
+import com.github.p3.entity.Category;
 import com.github.p3.entity.Product;
 import com.github.p3.entity.User;
 import com.github.p3.repository.ProductRepository;
@@ -66,5 +64,11 @@ public class ProductController {
 
         // ResponseEntity로 감싸서 반환
         return ResponseEntity.ok(products); // 200 OK 상태 코드와 함께 반환
+    }
+
+    // 카테고리별 상품 조회
+    @GetMapping("/category/{category}")
+    public List<CategoryDto> getProductsByCategory(@PathVariable("category") Category category) {
+        return productService.getProductsByCategory(category);
     }
 }
