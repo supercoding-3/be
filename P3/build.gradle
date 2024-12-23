@@ -21,6 +21,10 @@ configurations {
 
 repositories {
     mavenCentral()
+    // Gradle에서 Java 17 Toolchain을 다운로드할 수 있는 레포지토리 추가
+    maven {
+        url = uri("https://repo.gradle.org/gradle/libs-releases/")
+    }
 }
 
 dependencies {
