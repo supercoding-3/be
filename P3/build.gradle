@@ -64,6 +64,8 @@ dependencies {
     // JAXB
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.0'
     implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.0'
+
+    implementation 'org.modelmapper:modelmapper:2.4.4'
 }
 
 tasks.named('test') {
