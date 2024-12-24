@@ -9,6 +9,6 @@ public enum Category {
     뷰티_미용,
     취미생활,
     식품,
-    기타;
+    기타
 }
 

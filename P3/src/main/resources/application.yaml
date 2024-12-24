@@ -21,8 +21,8 @@ spring:
 
   security:
     user:
-      name: admin
-      password: admin123
+      name: ${SECURITY_USERNAME}
+      password: ${SECURITY_PASSWORD}
 
 jwt:
   secret: ${SECRET_KEY}
@@ -40,3 +40,11 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui/index.html
