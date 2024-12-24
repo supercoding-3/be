@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -59,5 +60,23 @@ public class Product {
     // 이미지 리스트 (Image 엔티티와의 관계)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>(); // 여러 이미지를 관리할 수 있는 필드
+
+    // 입찰 리스트 (Bid 엔티티와의 관계)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bid> bids = new ArrayList<>(); // 상품에 대한 모든 입찰
+
+
+    // 가장 높은 입찰가를 가져오는 메서드
+    public BigDecimal getHighestBidPrice() {
+        if (bids != null && !bids.isEmpty()) {
+            // 입찰가를 기준으로 내림차순 정렬
+            return bids.stream()
+                    .max(Comparator.comparing(Bid::getBidPrice))  // 가장 높은 입찰가
+                    .map(Bid::getBidPrice)
+                    .orElse(null);  // 입찰이 없으면 null 반환
+        }
+        return null;  // 입찰이 없으면 null 반환
+    }
+
 }
 
