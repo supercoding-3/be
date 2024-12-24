@@ -25,7 +25,10 @@ public enum ErrorCode {
     ACCOUNT_DEACTIVATED(HttpStatus.BAD_REQUEST, "비활성화된 계정입니다."),
 
     // 상품
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않은 상품입니다.");
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않은 상품입니다."),
+
+    // 권한 관련 오류
+    UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "권한이 없는 접근입니다.");
 
     private final HttpStatus status;
     private final String message;
