@@ -5,7 +5,6 @@ import com.github.p3.repository.RefreshTokenRepository;
 import com.github.p3.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -31,9 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws IOException, ServletException {
 
-        // 로그인, 회원가입, 로그아웃 시 필터를 건너뛰기
-        if (request.getRequestURI().equals("/api/user/login") || request.getRequestURI().equals("/api/user/signup")) {
-            filterChain.doFilter(request, response);  // 로그인, 회원가입, 로그아웃이면 필터를 건너뛰고 진행
+        if (request.getRequestURI().equals("/api/user/login") ||
+                request.getRequestURI().equals("/api/user/signup") ||
+                request.getRequestURI().startsWith("/v3/api-docs") ||
+                request.getRequestURI().startsWith("/swagger-ui") ||
+                request.getRequestURI().equals("/swagger-ui/index.html")) {
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -67,7 +69,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace();  // 예외 발생 시 스택 트레이스를 출력하여 문제 확인
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
             return;
         }
@@ -75,16 +76,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);  // 필터 체인 진행
     }
 
-    // 쿠키에서 액세스 토큰 가져오기
-    private String getTokenFromCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("access_token".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
 }
