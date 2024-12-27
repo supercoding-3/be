@@ -52,6 +52,10 @@ public class Product {
     @Column(name = "product_end_date")
     private LocalDateTime productEndDate;
 
+
+    @ElementCollection
+    private List<String> existingImageUrls; // 기존 이미지 URL 목록
+
     // 외래 키 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) // 외래 키 설정
@@ -65,7 +69,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bid> bids = new ArrayList<>(); // 상품에 대한 모든 입찰
 
-
     // 가장 높은 입찰가를 가져오는 메서드
     public BigDecimal getHighestBidPrice() {
         if (bids != null && !bids.isEmpty()) {
@@ -77,6 +80,7 @@ public class Product {
         }
         return null;  // 입찰이 없으면 null 반환
     }
+
 
 }
 

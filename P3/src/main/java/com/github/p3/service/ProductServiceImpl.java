@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final ImageRepository imageRepository;
     private final BidRepository bidRepository;
     private final ProductDetailMapper productDetailMapper;
+    private final S3Service s3Service;
 
     @Override
     @Transactional
@@ -102,5 +104,89 @@ public class ProductServiceImpl implements ProductService {
         // ProductEditDto로 매핑하여 반환
         return productMapper.toProductDetailDto(product);
     }
+
+    @Override
+    @Transactional
+    public void updateProduct(Long productId, ProductEditDto productEditDto, List<String> newImageUrls, User currentUser) {
+        // 기존 상품 조회
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 권한 확인
+        if (!existingProduct.getUser().equals(currentUser)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        // 상품 정보 업데이트 (수정된 필드만 반영)
+        if (productEditDto.getTitle() != null) {
+            existingProduct.setTitle(productEditDto.getTitle());
+        }
+        if (productEditDto.getDescription() != null) {
+            existingProduct.setDescription(productEditDto.getDescription());
+        }
+        if (productEditDto.getStartingBidPrice() != null) {
+            existingProduct.setStartingBidPrice(productEditDto.getStartingBidPrice());
+        }
+        if (productEditDto.getImmediatePrice() != null) {
+            existingProduct.setImmediatePrice(productEditDto.getImmediatePrice());
+        }
+        if (productEditDto.getCategory() != null) {
+            existingProduct.setCategory(productEditDto.getCategory());
+        }
+        if (productEditDto.getProductEndDate() != null) {
+            existingProduct.setProductEndDate(productEditDto.getProductEndDate());
+        }
+
+        // 새로운 이미지 추가 (null 체크 후)
+        if (newImageUrls != null && !newImageUrls.isEmpty()) {
+            for (String newImageUrl : newImageUrls) {
+                Image image = new Image();
+                image.setImageUrl(newImageUrl);
+                image.setProduct(existingProduct);
+                imageRepository.save(image); // DB에 저장
+            }
+        }
+
+        // 상품 정보 저장 (수정된 엔티티 저장)
+        productRepository.save(existingProduct);
+    }
+
+    @Override
+    @Transactional
+    public ProductEditDto getProductByProductId(Long productId) {
+        // 상품을 DB에서 찾기
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Product -> ProductEditDto로 변환하여 반환
+        return productMapper.toProductEditDto(product);
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteProduct(Long productId, User currentUser) {
+        // 상품 조회
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 권한 확인: 상품의 주인과 현재 사용자가 일치하는지 확인
+        if (!existingProduct.getUser().equals(currentUser)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        // S3에서 파일 삭제 (상품에 연결된 이미지들이 있을 경우)
+        if (existingProduct.getImages() != null) {
+            for (Image image : existingProduct.getImages()) {
+                if (image.getImageUrl() != null) {
+                    // S3에서 파일 삭제
+                    s3Service.deleteFileFromS3(image.getImageUrl());
+                }
+            }
+        }
+        // 상품 삭제
+        productRepository.delete(existingProduct);
+        return true;
+    }
+
 }
 
