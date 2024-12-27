@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.github.p3.config.AuthenticatedUser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,30 @@ public class ProductController {
         return ResponseEntity.ok(productDet);  // 상품 수정 페이지로 이동할 때 상품 정보만 반환
     }
 
+    @PatchMapping("/{id}/edit")
+    public ResponseEntity<String> updateProduct(
+            @PathVariable("id") Long productId,
+            @RequestPart(value = "product", required = false) ProductEditDto productEditDto, // 수정할 상품 정보
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages, // 새로운 이미지
+            @AuthenticatedUser User currentUser) {
+
+        // productEditDto가 null이면 기존의 상품 정보를 그대로 사용하도록 처리
+        if (productEditDto == null) {
+            // 예를 들어, 기존 상품 정보를 가져오는 서비스 메소드 호출
+            productEditDto = productService.getProductByProductId(productId);
+            if (productEditDto == null) {
+                return ResponseEntity.badRequest().body("Product not found");
+            }
+        }
+
+        // 새로운 이미지는 S3에 업로드
+        List<String> newImageUrls = newImages != null ? s3Service.uploadFiles(newImages) : new ArrayList<>();
+
+        // 상품 수정 처리
+        productService.updateProduct(productId, productEditDto, newImageUrls, currentUser);
+
+        return ResponseEntity.ok("상품 정보가 수정되었습니다.");
+    }
     @GetMapping("/all")
     public ResponseEntity<List<ProductAllDto>> getAllProducts() {
         // 서비스에서 상품 목록을 가져옴
@@ -81,5 +106,22 @@ public class ProductController {
         return productService.getProductsByCategory(category);
     }
 
+    // 상품 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable("id") Long productId,
+            @AuthenticatedUser User currentUser) {
+
+        // 서비스 호출
+        boolean isDeleted = productService.deleteProduct(productId, currentUser);
+
+        if (isDeleted) {
+            return ResponseEntity.ok("상품이 삭제되었습니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("상품 삭제를 실패하였습니다.");
+        }
+
+    }
 
 }
