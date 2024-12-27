@@ -62,12 +62,15 @@ public class ProductServiceImpl implements ProductService {
         // 최신 입찰 조회
         Bid latestBid = bidRepository.findTopByProductProductIdOrderByBidCreatedAtDesc(productId).orElse(null);
 
+        // 모든 입찰 목록 조회
+        List<Bid> allBids = bidRepository.findByProductProductIdOrderByBidCreatedAtDesc(productId);
+
         // 상품에 속한 이미지 조회
         List<String> imageUrls = product.getImages().stream()
                 .map(Image::getImageUrl)
                 .toList();
 
-        return productDetailMapper.toDtoWithAdditionalFields(product, imageUrls, latestBid, isSeller);
+        return productDetailMapper.toDtoWithAdditionalFields(product, imageUrls, latestBid, allBids, isSeller);
     }
 
     @Override
