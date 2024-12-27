@@ -46,4 +46,7 @@ public class User {
     @ToString.Exclude // 순환 참조 방지
     private RefreshToken refreshToken;
 
+    public User(String userEmail) {
+        this.userEmail = userEmail;
+    }
 }
