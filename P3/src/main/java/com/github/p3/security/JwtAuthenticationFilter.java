@@ -2,9 +2,9 @@ package com.github.p3.security;
 
 import com.github.p3.entity.RefreshToken;
 import com.github.p3.repository.RefreshTokenRepository;
-import com.github.p3.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             // 쿠키에서 액세스 토큰 가져오기
-            String accessToken = CookieUtil.getCookieValue(request, "access_token");
+            String accessToken = getTokenFromRequest(request);
             System.out.println(accessToken + " 엑세스 토큰을 가져왔습니다.");
             System.out.println("Is token valid? " + jwtTokenProvider.validateToken(accessToken));
 
@@ -76,4 +76,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);  // 필터 체인 진행
     }
 
+    // 쿠키 및 쿼리 파라미터에서 액세스 토큰을 가져오는 메서드
+    private String getTokenFromRequest(HttpServletRequest request) {
+        String token = getTokenFromCookie(request);
+        if (token != null) {
+            return token;
+        }
+
+        // 쿠키에 토큰이 없다면 쿼리 파라미터에서 토큰을 가져옴
+        return getTokenFromQueryParam(request);
+    }
+
+    // 쿠키에서 액세스 토큰을 가져오는 메서드
+    private String getTokenFromCookie(HttpServletRequest request) {
+        // 쿠키에서 액세스 토큰 가져오기
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    // 쿼리 파라미터에서 액세스 토큰을 가져오는 메서드
+    private String getTokenFromQueryParam(HttpServletRequest request) {
+        String token = request.getParameter("access_token");
+        if (token != null && !token.isEmpty()) {
+            return token;
+        }
+        return null;
+    }
 }
