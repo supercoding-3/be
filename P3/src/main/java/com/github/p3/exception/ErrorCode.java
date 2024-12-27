@@ -28,7 +28,11 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않은 상품입니다."),
 
     // 권한 관련 오류
-    UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "권한이 없는 접근입니다.");
+    UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "권한이 없는 접근입니다."),
+
+    // 가격
+    INVALID_BID_AMOUNT(HttpStatus.BAD_REQUEST, "입력된 가격이 0원 미만입니다."),
+    INVALID_BID_AMOUNT_LOW(HttpStatus.BAD_REQUEST, "입력된 가격이 최고가 보다 낮습니다.");
 
     private final HttpStatus status;
     private final String message;
