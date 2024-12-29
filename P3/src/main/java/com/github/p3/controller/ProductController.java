@@ -61,6 +61,7 @@ public class ProductController {
     // 상품 수정 페이지로 이동
     @GetMapping("/{id}/edit")
     public ResponseEntity<ProductDetailDto> getProductEdit(@PathVariable("id") Long productId, @AuthenticatedUser User currentUser) {
+        System.out.println("Current User: " + currentUser);
         // 서비스에서 상품 정보와 권한 체크를 처리
         ProductDetailDto productDet = productService.getProductInfo(productId, currentUser);
 
@@ -122,6 +123,21 @@ public class ProductController {
                     .body("상품 삭제를 실패하였습니다.");
         }
 
+    }
+
+    @PostMapping("/{id}/bid")
+    public ResponseEntity<String> bidProduct(
+            @PathVariable("id") Long productId,
+            @AuthenticatedUser User currentUser,
+            @RequestBody BidDto bidDto
+    ){
+        try{
+            // 서비스 호출
+            productService.bidProduct(productId, currentUser.getUserEmail(), bidDto);
+            return ResponseEntity.ok("입찰이 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

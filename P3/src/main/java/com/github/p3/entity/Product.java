@@ -1,11 +1,11 @@
 package com.github.p3.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -53,7 +53,7 @@ public class Product {
     private LocalDateTime productEndDate;
 
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> existingImageUrls; // 기존 이미지 URL 목록
 
     // 외래 키 설정
@@ -63,6 +63,7 @@ public class Product {
 
     // 이미지 리스트 (Image 엔티티와의 관계)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // 순환 참조 방지
     private List<Image> images = new ArrayList<>(); // 여러 이미지를 관리할 수 있는 필드
 
     // 입찰 리스트 (Bid 엔티티와의 관계)

@@ -1,16 +1,17 @@
 package com.github.p3.entity;
 
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "users")
 public class User {
 
@@ -45,5 +46,6 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @ToString.Exclude // 순환 참조 방지
     private RefreshToken refreshToken;
+
 
 }

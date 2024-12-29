@@ -28,4 +28,6 @@ public interface ProductService {
     ProductEditDto getProductByProductId(Long productId);
 
     boolean deleteProduct(Long productId, User currentUser);
+
+    void bidProduct(Long productId, String userEmail, BidDto bidDto);
 }

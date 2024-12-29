@@ -31,8 +31,7 @@ public interface ProductMapper {
     @Mapping(target = "productStatus", source = "productStatus") // 상품 상태 매핑
     CategoryDto toCategoryDto(Product product);
 
-    // 상품 상세 조회용 매핑 (상품 정보 조회)
-    @Mapping(target = "existingImageUrls", expression = "java(product.getImages().stream().map(image -> image.getImageUrl()).collect(java.util.stream.Collectors.toList()))") // 기존 이미지 URL 매핑
+    @Mapping(target = "existingImageUrls", expression = "java(product.getImages() != null ? product.getImages().stream().map(image -> image.getImageUrl()).collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList())")
     ProductDetailDto toProductDetailDto(Product product);
 
     // ProductEditDto -> Product 변환
