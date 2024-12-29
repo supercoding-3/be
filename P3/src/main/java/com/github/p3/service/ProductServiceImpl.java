@@ -4,17 +4,22 @@ import com.github.p3.dto.*;
 import com.github.p3.entity.*;
 import com.github.p3.exception.CustomException;
 import com.github.p3.exception.ErrorCode;
+import com.github.p3.mapper.BidMapper;
 import com.github.p3.mapper.ProductDetailMapper;
 import com.github.p3.mapper.ProductMapper;
 import com.github.p3.repository.BidRepository;
 import com.github.p3.repository.ImageRepository;
 import com.github.p3.repository.ProductRepository;
+import com.github.p3.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +34,11 @@ public class ProductServiceImpl implements ProductService {
     private final BidRepository bidRepository;
     private final ProductDetailMapper productDetailMapper;
     private final S3Service s3Service;
+    private final UserRepository userRepository;
+    private final BidMapper bidMapper;
+
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
+
 
     @Override
     @Transactional
@@ -55,20 +65,27 @@ public class ProductServiceImpl implements ProductService {
         // 상품 조회
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        log.debug("Product ID: {}", productId);
+        log.debug("Product Title: {}", product.getTitle());
 
         // 현재 사용자가 판매자인지 여부 확인
         boolean isSeller = product.getUser().equals(currentUser);
+        log.debug("Current User: {}", currentUser.getUserEmail());
+        log.debug("Is Seller: {}", isSeller);
 
         // 최신 입찰 조회
         Bid latestBid = bidRepository.findTopByProductProductIdOrderByBidCreatedAtDesc(productId).orElse(null);
-
+        log.debug("Latest Bid: {}", latestBid);
         // 모든 입찰 목록 조회
         List<Bid> allBids = bidRepository.findByProductProductIdOrderByBidCreatedAtDesc(productId);
+        log.debug("All Bids Count: {}", allBids.size());
 
         // 상품에 속한 이미지 조회
         List<String> imageUrls = product.getImages().stream()
                 .map(Image::getImageUrl)
                 .toList();
+
+        log.debug("Image URLs Count: {}", imageUrls.size());
 
         return productDetailMapper.toDtoWithAdditionalFields(product, imageUrls, latestBid, allBids, isSeller);
     }
@@ -191,5 +208,39 @@ public class ProductServiceImpl implements ProductService {
         return true;
     }
 
+    @Override
+    @Transactional
+    public void bidProduct(Long productId, String userEmail, BidDto bidDto) {
+        // 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // userId로 User 객체 조회
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(()-> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+
+        // 입찰 금액 검증
+        BigDecimal bidPrice = bidDto.getBidPrice();
+
+        // 최초 입찰일 경우
+        if (product.getBids().isEmpty()) {
+            if (bidPrice.compareTo(product.getStartingBidPrice()) <= 0) {
+                throw new CustomException(ErrorCode.INVALID_BID_AMOUNT);
+            }
+        } else {
+            // 기존 입찰이 있을 경우, 가장 높은 입찰 금액보다 커야 함
+            BigDecimal highestBidPrice = product.getHighestBidPrice();
+            if (highestBidPrice != null && bidPrice.compareTo(highestBidPrice) <= 0) {
+                throw new CustomException(ErrorCode.INVALID_BID_AMOUNT_LOW);
+            }
+        }
+
+        // 입찰 객체 생성 (BidMapper 사용)
+        Bid bid = bidMapper.toEntity(bidDto, product, user);
+
+        // 입찰 저장
+        bidRepository.save(bid);
+
+    }
 }
 

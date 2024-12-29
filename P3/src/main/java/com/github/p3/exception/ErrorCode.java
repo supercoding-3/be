@@ -31,8 +31,8 @@ public enum ErrorCode {
     UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "권한이 없는 접근입니다."),
 
     // 가격
-    INVALID_BID_AMOUNT(HttpStatus.BAD_REQUEST, "입력된 가격이 0원 미만입니다."),
-    INVALID_BID_AMOUNT_LOW(HttpStatus.BAD_REQUEST, "입력된 가격이 최고가 보다 낮습니다.");
+    INVALID_BID_AMOUNT(HttpStatus.BAD_REQUEST, "입찰 금액은 시작 입찰가보다 높아야 합니다."),
+    INVALID_BID_AMOUNT_LOW(HttpStatus.BAD_REQUEST, "입력된 가격이 현재 입찰가보다 낮습니다.");
 
     private final HttpStatus status;
     private final String message;
