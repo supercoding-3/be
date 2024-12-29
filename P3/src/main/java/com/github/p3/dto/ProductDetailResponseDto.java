@@ -26,6 +26,7 @@ public class ProductDetailResponseDto {
     private BidStatus bidStatus;     // 입찰 상태
     private List<String> imageUrls;
     private Bid latestBid;
+    private List<Bid> allBids; // 모든 입찰 기록
     private Boolean isSeller; // 판매자인지 여부
 
 }

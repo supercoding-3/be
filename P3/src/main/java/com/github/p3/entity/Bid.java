@@ -1,5 +1,7 @@
 package com.github.p3.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,10 +22,12 @@ public class Bid {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonBackReference  // 순환 참조 방지
     private Product product; // 입찰한 상품 (Product 엔티티와 관계)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user; // 입찰한 사용자 (User 엔티티와 관계)
 
     @Column(name = "bid_price", precision = 10, scale = 2)
@@ -31,7 +35,7 @@ public class Bid {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BidStatus bidStatus = BidStatus.입찰; // 입찰 상태 (기본값: 입찰)
+    private BidStatus bidStatus = BidStatus.입찰중; // 입찰 상태 (기본값: 입찰)
 
     @Column(name = "bid_created_at")
     private LocalDateTime bidCreatedAt = LocalDateTime.now(); // 입찰 시간
