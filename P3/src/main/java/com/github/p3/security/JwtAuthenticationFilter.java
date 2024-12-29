@@ -30,18 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws IOException, ServletException {
 
-        // CORS 헤더 추가
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");  // 클라이언트 도메인
-        response.setHeader("Access-Control-Allow-Credentials", "true");  // 쿠키를 포함한 요청 허용
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");  // 허용되는 HTTP 메서드
-        response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, X-Requested-With, Authorization");  // 허용되는 헤더들
-
-        // CORS pre-flight 요청 처리 (OPTIONS 메서드)
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }
-
         if (request.getRequestURI().equals("/api/user/login") ||
                 request.getRequestURI().equals("/api/user/signup") ||
                 request.getRequestURI().startsWith("/v3/api-docs") ||
