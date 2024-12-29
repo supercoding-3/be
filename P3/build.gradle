@@ -66,6 +66,10 @@ dependencies {
     implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.0'
 
     implementation 'org.modelmapper:modelmapper:2.4.4'
+
+    // log
+
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
 }
 
 tasks.named('test') {

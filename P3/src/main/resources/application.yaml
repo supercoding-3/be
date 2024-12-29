@@ -48,3 +48,9 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui/index.html
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    org.hibernate.engine.internal: DEBUG

@@ -23,4 +23,11 @@ public interface ProductService {
     ProductDetailDto getProductInfo(Long productId, User currentUser);
 
 
+    void updateProduct(Long productId, ProductEditDto productEditDto, List<String> newImageUrls, User currentUser);
+
+    ProductEditDto getProductByProductId(Long productId);
+
+    boolean deleteProduct(Long productId, User currentUser);
+
+    void bidProduct(Long productId, String userEmail, BidDto bidDto);
 }
