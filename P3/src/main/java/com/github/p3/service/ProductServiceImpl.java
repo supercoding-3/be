@@ -242,5 +242,28 @@ public class ProductServiceImpl implements ProductService {
         bidRepository.save(bid);
 
     }
+
+    @Override
+    @Transactional
+    public void completedTransaction(Long productId, Integer buyerId, BigDecimal bidPrice, User currentUser) {
+        // 상품 및 구매자 검증
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 현재 사용자가 판매자인지 확인
+        if (!product.getUser().equals(currentUser)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
+        }
+
+        User buyer = userRepository.findById(buyerId)
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        User seller = currentUser;
+
+
+
+
+
+    }
 }
 
