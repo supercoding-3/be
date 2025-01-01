@@ -13,7 +13,6 @@ import com.github.p3.repository.ProductRepository;
 import com.github.p3.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -241,6 +240,15 @@ public class ProductServiceImpl implements ProductService {
         // 입찰 저장
         bidRepository.save(bid);
 
+    }
+
+    @Override
+    @Transactional
+    public List<ProductAllDto> searchProductsByTitle(String title) {
+        List<Product> products = productRepository.findByTitleContainingIgnoreCase(title);
+        return products.stream()
+                .map(productMapper::toProductAllDto)
+                .collect(Collectors.toList());
     }
 }
 
