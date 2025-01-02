@@ -2,11 +2,15 @@ package com.github.p3.mapper;
 
 import com.github.p3.dto.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
+
+import com.github.p3.entity.Image;
 import com.github.p3.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
+import org.mapstruct.MappingTarget;
 
 
 @Mapper(componentModel = "spring")
@@ -27,8 +31,14 @@ public interface ProductMapper {
     @Mapping(target = "productStatus", source = "productStatus") // 상품 상태 매핑
     CategoryDto toCategoryDto(Product product);
 
-    // 상품 상세 조회용 매핑 (상품 정보 조회)
-    @Mapping(target = "existingImageUrls", expression = "java(product.getImages().stream().map(image -> image.getImageUrl()).collect(java.util.stream.Collectors.toList()))") // 기존 이미지 URL 매핑
+    @Mapping(target = "existingImageUrls", expression = "java(product.getImages() != null ? product.getImages().stream().map(image -> image.getImageUrl()).collect(java.util.stream.Collectors.toList()) : java.util.Collections.emptyList())")
     ProductDetailDto toProductDetailDto(Product product);
 
+    // ProductEditDto -> Product 변환
+    @Mapping(target = "user", ignore = true)  // 사용자 정보는 컨트롤러에서 설정
+    Product toEntity(ProductEditDto productEditDto);
+
+    // Product -> ProductEditDto 변환 (이 부분을 추가)
+    @Mapping(target = "existingImageUrls", expression = "java(product.getImages().stream().map(image -> image.getImageUrl()).collect(java.util.stream.Collectors.toList()))") // 기존 이미지 URL 매핑
+    ProductEditDto toProductEditDto(Product product);  // 추가된 메서드
 }
