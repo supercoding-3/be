@@ -32,5 +32,6 @@ public interface ProductService {
 
     void bidProduct(Long productId, String userEmail, BidDto bidDto);
 
-    void completedTransaction(Long productId, Integer buyerId, BigDecimal bidPrice, User currentUser);
+
+    void completedTransaction(Long productId, Long bidId, User currentUser);
 }

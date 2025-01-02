@@ -10,6 +10,5 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionDto {
-    private Integer buyerId;
-    private BigDecimal bidPrice;
+    private Long bidId;
 }
