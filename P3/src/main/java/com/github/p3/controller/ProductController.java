@@ -145,6 +145,7 @@ public class ProductController {
     public ResponseEntity<List<ProductAllDto>> searchProducts(@RequestParam String title) {
         List<ProductAllDto> products = productService.searchProductsByTitle(title);
         return ResponseEntity.ok(products);
+    }
   
     @PostMapping("/{id}/award")
     public ResponseEntity<String> completedTransaction(
