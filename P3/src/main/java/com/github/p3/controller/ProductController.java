@@ -149,14 +149,14 @@ public class ProductController {
     ) {
         try {
             // 서비스에서 검증 및 트랜잭션 생성
-            productService.completedTransaction(productId, transactionDto.getBuyerId(), transactionDto.getBidPrice(), currentUser);
+            productService.completedTransaction(productId, transactionDto.getBidId(), currentUser);
 
             // 응답 메시지: 트랜잭션이 성공적으로 완료되었음을 알림
-            return ResponseEntity.ok("Transaction completed successfully");
+            return ResponseEntity.ok("낙찰이 완료되었습니다.");
 
         } catch (EntityNotFoundException e) {
-            // 상품이나 바이어가 없을 때 404 반환
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("상품 및 구매자의 정보를 찾을 수 없습니다.");
+            // 상품이나 입찰 정보가 없을 때 404 반환
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("상품 또는 입찰 정보를 찾을 수 없습니다.");
         } catch (Exception e) {
             // 예기치 않은 오류 처리
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -33,7 +33,7 @@ public class Transaction {
     private User seller; // 판매자
 
     @Column(name = "price", precision = 10, scale = 2, nullable = false)
-    private BigDecimal price;
+    private BigDecimal TransactionPrice;
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
