@@ -244,6 +244,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    public List<ProductAllDto> searchProductsByTitle(String title) {
+        List<Product> products = productRepository.findByTitleContainingIgnoreCase(title);
+        return products.stream()
+                .map(productMapper::toProductAllDto)
+                .collect(Collectors.toList());
+    }
+      
+    @Override
+    @Transactional
     public void completedTransaction(Long productId, Long bidId, User currentUser) {
         // 상품 조회
         Product product = productRepository.findById(productId)
