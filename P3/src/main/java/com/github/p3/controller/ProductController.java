@@ -5,6 +5,7 @@ import com.github.p3.entity.Category;
 import com.github.p3.entity.User;
 import com.github.p3.service.ProductService;
 import com.github.p3.service.S3Service;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -137,6 +138,29 @@ public class ProductController {
             return ResponseEntity.ok("입찰이 완료되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/award")
+    public ResponseEntity<String> completedTransaction(
+            @PathVariable("id") Long productId,
+            @RequestBody TransactionDto transactionDto,
+            @AuthenticatedUser User currentUser
+    ) {
+        try {
+            // 서비스에서 검증 및 트랜잭션 생성
+            productService.completedTransaction(productId, transactionDto.getBidId(), currentUser);
+
+            // 응답 메시지: 트랜잭션이 성공적으로 완료되었음을 알림
+            return ResponseEntity.ok("낙찰이 완료되었습니다.");
+
+        } catch (EntityNotFoundException e) {
+            // 상품이나 입찰 정보가 없을 때 404 반환
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("상품 또는 입찰 정보를 찾을 수 없습니다.");
+        } catch (Exception e) {
+            // 예기치 않은 오류 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("거래를 완료하는 도중 에러가 발생하였습니다.");
         }
     }
 

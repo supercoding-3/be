@@ -8,6 +8,7 @@ import com.github.p3.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
@@ -30,4 +31,7 @@ public interface ProductService {
     boolean deleteProduct(Long productId, User currentUser);
 
     void bidProduct(Long productId, String userEmail, BidDto bidDto);
+
+
+    void completedTransaction(Long productId, Long bidId, User currentUser);
 }
