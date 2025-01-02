@@ -7,10 +7,8 @@ import com.github.p3.exception.ErrorCode;
 import com.github.p3.mapper.BidMapper;
 import com.github.p3.mapper.ProductDetailMapper;
 import com.github.p3.mapper.ProductMapper;
-import com.github.p3.repository.BidRepository;
-import com.github.p3.repository.ImageRepository;
-import com.github.p3.repository.ProductRepository;
-import com.github.p3.repository.UserRepository;
+import com.github.p3.mapper.TransactionMapper;
+import com.github.p3.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -35,6 +33,8 @@ public class ProductServiceImpl implements ProductService {
     private final S3Service s3Service;
     private final UserRepository userRepository;
     private final BidMapper bidMapper;
+    private final TransactionMapper transactionMapper;
+    private final TransactionRepository transactionRepository;
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
@@ -216,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
 
         // userId로 User 객체 조회
         User user = userRepository.findByUserEmail(userEmail)
-                .orElseThrow(()-> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
 
         // 입찰 금액 검증
         BigDecimal bidPrice = bidDto.getBidPrice();
@@ -249,6 +249,46 @@ public class ProductServiceImpl implements ProductService {
         return products.stream()
                 .map(productMapper::toProductAllDto)
                 .collect(Collectors.toList());
+    }
+      
+    @Override
+    @Transactional
+    public void completedTransaction(Long productId, Long bidId, User currentUser) {
+        // 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 현재 사용자가 판매자인지 확인
+        if (!product.getUser().equals(currentUser)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
+        }
+
+        // 입찰 정보 조회
+        Bid bid = bidRepository.findById(bidId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BID_NOT_FOUND));
+
+        // 상품과 입찰이 매칭되는지 확인
+        if (!bid.getProduct().equals(product)) {
+            throw new CustomException(ErrorCode.INVALID_BID);  // 잘못된 입찰 정보
+        }
+
+        // 입찰자 정보 가져오기 (구매자 정보)
+        User buyer = bid.getUser();  // 여기서 구매자 정보 추출
+
+        // 입찰 상태를 '낙찰'로 변경
+        bid.setBidStatus(BidStatus.낙찰);
+        bidRepository.save(bid);
+
+        // 상품 상태를 '낙찰'로 변경
+        product.setProductStatus(ProductStatus.낙찰);
+        productRepository.save(product);
+
+        // 트랜잭션 객체 생성 (MapStruct 사용)
+        Transaction transaction = transactionMapper.toTransaction(product, buyer, currentUser, bid.getBidPrice());
+
+        // 트랜잭션 저장
+        transactionRepository.save(transaction);
+
     }
 }
 
