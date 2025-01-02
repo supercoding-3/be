@@ -1,6 +1,7 @@
 package com.github.p3.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -56,4 +59,22 @@ public class S3Service {
             throw new RuntimeException("Error uploading file to S3", e);
         }
     }
+
+    public void deleteFileFromS3(String fileUrl) {
+        try {
+            // URL에서 파일 이름만 추출
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
+            // URL 디코딩하여 파일 이름 처리 (특수 문자 및 공백 처리)
+            fileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+
+            // S3에서 해당 파일 삭제
+            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
+            log.info("File deleted from S3: {}", fileName);
+        } catch (Exception e) {
+            log.error("Error deleting file from S3", e);
+            throw new RuntimeException("Error deleting file from S3", e);
+        }
+    }
+
 }

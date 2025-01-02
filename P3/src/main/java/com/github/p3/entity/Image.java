@@ -1,5 +1,6 @@
 package com.github.p3.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +22,4 @@ public class Image {
 
     @Column(nullable = false)
     private String imageUrl; // 이미지 URL
-
 }
