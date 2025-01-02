@@ -141,6 +141,11 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductAllDto>> searchProducts(@RequestParam String title) {
+        List<ProductAllDto> products = productService.searchProductsByTitle(title);
+        return ResponseEntity.ok(products);
+  
     @PostMapping("/{id}/award")
     public ResponseEntity<String> completedTransaction(
             @PathVariable("id") Long productId,
@@ -162,6 +167,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("거래를 완료하는 도중 에러가 발생하였습니다.");
         }
+
     }
 
 }

@@ -5,6 +5,7 @@ import com.github.p3.dto.*;
 import com.github.p3.entity.Category;
 import com.github.p3.entity.Product;
 import com.github.p3.entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,5 +34,9 @@ public interface ProductService {
     void bidProduct(Long productId, String userEmail, BidDto bidDto);
 
 
+    List<ProductAllDto> searchProductsByTitle(String title);
+
+
     void completedTransaction(Long productId, Long bidId, User currentUser);
+
 }
