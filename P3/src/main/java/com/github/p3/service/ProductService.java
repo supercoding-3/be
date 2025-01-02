@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
@@ -32,5 +33,10 @@ public interface ProductService {
 
     void bidProduct(Long productId, String userEmail, BidDto bidDto);
 
+
     List<ProductAllDto> searchProductsByTitle(String title);
+
+
+    void completedTransaction(Long productId, Long bidId, User currentUser);
+
 }
