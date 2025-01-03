@@ -27,4 +27,8 @@ public class ChatMessage {
     @Enumerated(EnumType.STRING)
     private MessageType messageType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
 }
