@@ -78,9 +78,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 .receiver(receiverUser.getUserEmail())
                 .message(chatMessage.getMessage())
                 .messageType(chatMessage.getMessageType())
+                .productId(chatMessage.getProduct())
                 .build();
 
-        chatMessageServiceImpl.saveMessage(chatMessageDto);
+        try {
+            chatMessageServiceImpl.saveMessage(chatMessageDto);
+        } catch (Exception e) {
+            log.error("채팅 메시지 저장 중 오류 발생: {}", e.getMessage());
+            return;
+        }
 
         // 메시지 전달: 수신자 세션을 찾아 메시지 전송
         WebSocketSession receiverSession = sessions.get(receiverUser.getUserEmail());
@@ -98,6 +104,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             log.info("송신자 '{}'에게 메시지 전송 완료", chatMessage.getSender().getUserEmail());
         } else {
             log.error("송신자 '{}'의 세션이 열려 있지 않거나 존재하지 않습니다.", chatMessage.getSender().getUserEmail());
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, org.springframework.web.socket.CloseStatus status) throws Exception {
+        String userEmail = (String) session.getAttributes().get("userEmail");
+        if (userEmail != null) {
+            sessions.remove(userEmail);
+            log.info("사용자 '{}' 연결 종료", userEmail);
         }
     }
 }

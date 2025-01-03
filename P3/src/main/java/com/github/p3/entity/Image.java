@@ -18,6 +18,7 @@ public class Image {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @JsonBackReference
     private Product product; // 해당 이미지를 소속한 상품
 
     @Column(nullable = false)
