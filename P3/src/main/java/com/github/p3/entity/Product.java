@@ -82,6 +82,10 @@ public class Product {
         return null;  // 입찰이 없으면 null 반환
     }
 
+    @PreUpdate
+    public void updateTimestamp() {
+        this.productUpdatedAt = LocalDateTime.now();
+    }
 
 }
 
