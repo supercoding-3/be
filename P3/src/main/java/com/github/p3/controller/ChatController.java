@@ -19,6 +19,7 @@ import java.io.IOException;
 public class ChatController {
 
     private final ChatMessageService chatMessageService;
+    private final ObjectMapper objectMapper;
 
     @MessageMapping("/send")
     public void sendMessage(@Payload ChatMessageDto chatMessageDto, WebSocketSession session) {
@@ -28,7 +29,7 @@ public class ChatController {
         // 채팅 메시지를 해당 사용자에게 전송 (WebSocket 세션을 사용)
         try {
             // 메시지 전송
-            TextMessage message = new TextMessage(new ObjectMapper().writeValueAsString(chatMessageDto));
+            TextMessage message = new TextMessage(objectMapper.writeValueAsString(chatMessageDto));
             session.sendMessage(message);
         } catch (IOException e) {
             log.error("Error sending message: {}", e.getMessage());
