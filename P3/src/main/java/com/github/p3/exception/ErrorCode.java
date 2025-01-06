@@ -47,7 +47,8 @@ public enum ErrorCode {
     // 채팅
     SENDER_NOT_FOUND(HttpStatus.NOT_FOUND, "발신자를 찾을 수 없습니다"),
     RECEIVER_NOT_FOUND(HttpStatus.NOT_FOUND, "수신자를 찾을 수 없습니다."),
-    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "거래 중인 상품을 찾을 수 없습니다.");
+    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "거래 중인 상품을 찾을 수 없습니다."),
+    CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 메시지를 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;
