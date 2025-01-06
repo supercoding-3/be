@@ -250,7 +250,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(productMapper::toProductAllDto)
                 .collect(Collectors.toList());
     }
-      
+
     @Override
     @Transactional
     public void completedTransaction(Long productId, Long bidId, User currentUser) {
@@ -259,7 +259,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 현재 사용자가 판매자인지 확인
-        if (!product.getUser().equals(currentUser)) {
+        if (!product.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
         }
 
@@ -268,7 +268,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.BID_NOT_FOUND));
 
         // 상품과 입찰이 매칭되는지 확인
-        if (!bid.getProduct().equals(product)) {
+        if (!bid.getProduct().getProductId().equals(product.getProductId())) {
             throw new CustomException(ErrorCode.INVALID_BID);  // 잘못된 입찰 정보
         }
 
@@ -283,7 +283,6 @@ public class ProductServiceImpl implements ProductService {
         product.setProductStatus(ProductStatus.낙찰);
         productRepository.save(product);
 
-        // 트랜잭션 객체 생성 (MapStruct 사용)
         Transaction transaction = transactionMapper.toTransaction(product, buyer, currentUser, bid.getBidPrice());
 
         // 트랜잭션 저장
