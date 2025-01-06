@@ -47,4 +47,11 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
         chatMessageRepository.save(chatMessage);
     }
+
+    @Override
+    public void deleteChat(Long chatId) {
+        ChatMessage chatMessage = chatMessageRepository.findById(chatId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_NOT_FOUND));
+        chatMessageRepository.delete(chatMessage);
+    }
 }
