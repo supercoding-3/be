@@ -78,7 +78,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 .receiver(receiverUser.getUserEmail())
                 .message(chatMessage.getMessage())
                 .messageType(chatMessage.getMessageType())
-                .productId(chatMessage.getProduct())
+                .productId(chatMessage.getProduct() != null ? chatMessage.getProduct().getProductId() : null)
                 .build();
 
         try {
