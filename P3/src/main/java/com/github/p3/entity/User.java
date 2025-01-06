@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -47,5 +48,15 @@ public class User {
     @ToString.Exclude // 순환 참조 방지
     private RefreshToken refreshToken;
 
+    public User(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    @OneToMany(mappedBy = "user")
+    private List<Bid> bids;
+
+    public boolean hasAward(Long productId) {
+        return bids.stream().anyMatch(bid -> bid.getProduct().getProductId().equals(productId) && bid.getBidStatus() == BidStatus.낙찰);
+    }
 
 }
