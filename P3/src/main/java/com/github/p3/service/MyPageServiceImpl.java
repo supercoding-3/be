@@ -2,6 +2,7 @@ package com.github.p3.service;
 
 import com.github.p3.dto.MyPageResponseDto;
 import com.github.p3.dto.ProductDto;
+import com.github.p3.dto.UserProfileUpdateDto;
 import com.github.p3.entity.*;
 import com.github.p3.exception.CustomException;
 import com.github.p3.exception.ErrorCode;
@@ -9,9 +10,12 @@ import com.github.p3.mapper.MyPageMapper;
 import com.github.p3.repository.BidRepository;
 import com.github.p3.repository.ProductRepository;
 import com.github.p3.repository.TransactionRepository;
+import com.github.p3.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.math.BigDecimal;
@@ -28,6 +32,9 @@ public class MyPageServiceImpl implements MyPageService {
     private final ProductRepository productRepository;
     private final TransactionRepository transactionRepository;
     private final BidRepository bidRepository;
+    private final UserRepository userRepository;
+    private final S3Service s3Service;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional  // 트랜잭션 처리
     @Override
@@ -196,5 +203,70 @@ public class MyPageServiceImpl implements MyPageService {
     }
 
 
+    @Transactional
+    @Override
+    public void updateUserProfile(Integer userId, MultipartFile newImage, User currentUser) {
+        // 현재 사용자가 수정하려는 사용자가 맞는지 확인
+        if (!currentUser.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한 오류 처리
+        }
+
+        // 유저 정보 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 새 이미지 업로드
+        String newImageUrl = s3Service.uploadSingleFile(newImage);
+
+        // 기존 이미지 삭제 (선택 사항)
+        if (user.getProfileImageUrl() != null) {
+            s3Service.deleteFileFromS3(user.getProfileImageUrl());
+        }
+
+        // 새 이미지 URL 저장
+        user.setProfileImageUrl(newImageUrl);
+
+        // 변경된 유저 정보 저장
+        userRepository.save(user);
+
+        System.out.println("User profile updated with new image URL: " + newImageUrl);
+    }
+
+    @Transactional
+    @Override
+    public void updateUserProfile(User currentUser, Integer userId, UserProfileUpdateDto dto) {
+        // 현재 사용자가 수정하려는 사용자가 맞는지 확인
+        if (!currentUser.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        // 사용자 정보 수정 로직
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 비밀번호 확인
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new RuntimeException("Passwords do not match");
+        }
+
+        // 비밀번호 변경 (비밀번호는 암호화해서 저장)
+        if (dto.getPassword() != null) {
+            user.setUserPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        // 이메일, 닉네임, 전화번호 등 다른 정보 수정
+        if (dto.getEmail() != null) {
+            user.setUserEmail(dto.getEmail());
+        }
+        if (dto.getNickname() != null) {
+            user.setUserNickname(dto.getNickname());
+        }
+        if (dto.getPhoneNumber() != null) {
+            user.setUserPhone(dto.getPhoneNumber());
+        }
+
+        // 변경된 유저 정보 저장
+        userRepository.save(user);
+    }
 }
 
