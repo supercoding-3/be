@@ -2,12 +2,14 @@ package com.github.p3.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -45,4 +47,7 @@ public class Bid {
 
     @Column(name = "bid_canceled_at")
     private LocalDateTime bidCanceledAt; // 입찰 취소 시간 (입찰 취소 시 기록)
+
+    @OneToMany(mappedBy = "bid")
+    private List<Transaction> transactions;  // Bid와 관련된 거래들
 }
