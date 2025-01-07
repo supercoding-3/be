@@ -4,6 +4,7 @@ package com.github.p3.controller;
 import com.github.p3.config.AuthenticatedUser;
 import com.github.p3.dto.MyPageResponseDto;
 import com.github.p3.dto.ProductDto;
+import com.github.p3.dto.UserProfileUpdateDto;
 import com.github.p3.entity.ProductStatus;
 import com.github.p3.entity.User;
 import com.github.p3.service.MyPageService;
@@ -11,12 +12,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -89,5 +91,35 @@ public class MyPageController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("낙찰 취소 실패");
         }
+    }
+
+    @GetMapping("/my-page/edit")
+    public ResponseEntity<Map<String, String>> showUserEditPage() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "회원정보 수정 페이지로 이동합니다.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/my-page/edit/{userId}/profile")
+    public ResponseEntity<String> updateUserProfile(
+            @PathVariable Integer userId,
+            @RequestParam("newImage") MultipartFile newImage,
+            @AuthenticatedUser User currentUser) {
+
+        myPageService.updateUserProfile(userId, newImage, currentUser);
+        return ResponseEntity.ok("유저 프로필 사진 업데이트가 완료되었습니다.");
+    }
+
+
+    @PatchMapping("/my-page/edit/{userId}")
+    public ResponseEntity<String> updateUserProfile(
+            @PathVariable Integer userId,  // URL에서 userId를 받음
+            @RequestBody UserProfileUpdateDto dto,  // 요청 본문에서 수정할 정보를 받음
+            @AuthenticatedUser User currentUser) {  // 인증된 사용자의 정보
+
+        // 서비스 로직 호출하여 사용자 정보 수정
+        myPageService.updateUserProfile(currentUser, userId, dto);
+
+        return ResponseEntity.ok("유저 프로필이 성공적으로 변경되었습니다.");
     }
 }
