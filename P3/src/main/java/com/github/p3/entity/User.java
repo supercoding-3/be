@@ -58,5 +58,4 @@ public class User {
     public boolean hasAward(Long productId) {
         return bids.stream().anyMatch(bid -> bid.getProduct().getProductId().equals(productId) && bid.getBidStatus() == BidStatus.낙찰);
     }
-
 }
