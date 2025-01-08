@@ -13,6 +13,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -47,6 +48,12 @@ public class ChatController {
         } catch (IOException e) {
             log.error("전송 메시지 에러: {}", e.getMessage());
         }
+    }
+
+    @GetMapping("/room/{transactionId}")
+    public ResponseEntity<List<ChatMessageDto>> getChatMessages(@PathVariable Long transactionId) {
+        List<ChatMessageDto> chatMessages = chatMessageService.getChatMessages(transactionId);
+        return ResponseEntity.ok(chatMessages);
     }
 
     @DeleteMapping("/{chatId}")
