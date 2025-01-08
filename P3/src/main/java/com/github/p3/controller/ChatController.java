@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -26,9 +23,19 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
     private final ObjectMapper objectMapper;
 
+    // 채팅방 번호
+    @PostMapping("/room")
+    public ResponseEntity<String> createChatRoom(@RequestBody ChatMessageDto chatMessageDto) {
+        Long transactionId = chatMessageService.createChatRoomId(chatMessageDto.getProductId(), chatMessageDto.getSender(), chatMessageDto.getReceiver());
+        log.info("채팅방 번호 {} 생성", transactionId);
+        return ResponseEntity.ok("채팅방 생성 : " + transactionId);
+    }
+
     // WebSocket에서 메시지를 보내는 부분
-    @MessageMapping("/send")
-    public void sendMessage(@Payload ChatMessageDto chatMessageDto, WebSocketSession session) {
+    @MessageMapping("/room/{transactionId}")
+    public void sendMessage(@PathVariable Long transactionId, @Payload ChatMessageDto chatMessageDto, WebSocketSession session) {
+        chatMessageDto.setTransactionId(transactionId);
+
         // 메시지 저장
         chatMessageService.saveMessage(chatMessageDto);
 
@@ -38,7 +45,7 @@ public class ChatController {
             TextMessage message = new TextMessage(objectMapper.writeValueAsString(chatMessageDto));
             session.sendMessage(message);
         } catch (IOException e) {
-            log.error("Error sending message: {}", e.getMessage());
+            log.error("전송 메시지 에러: {}", e.getMessage());
         }
     }
 

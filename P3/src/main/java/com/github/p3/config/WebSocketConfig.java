@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(chatWebSocketHandler, "/chat") // WebSocket 엔드포인트 설정
+        registry.addHandler(chatWebSocketHandler, "/chat/room/{transactionId}") // WebSocket 엔드포인트 설정
                 .addInterceptors(jwtHandshakeInterceptor)
                 .setAllowedOrigins("http://localhost:3000", "https://auction-deploy-kappa.vercel.app");
     }
