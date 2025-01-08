@@ -14,6 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -27,8 +28,7 @@ public class ChatController {
     // 채팅방 번호
     @PostMapping("/room")
     public ResponseEntity<String> createChatRoom(@RequestBody ChatMessageDto chatMessageDto) {
-        Long transactionId = chatMessageService.createChatRoomId(chatMessageDto.getProductId(), chatMessageDto.getSender(), chatMessageDto.getReceiver());
-        log.info("채팅방 번호 {} 생성", transactionId);
+        Long transactionId = chatMessageService.createChatRoomId(chatMessageDto.getProductId());
         return ResponseEntity.ok("채팅방 생성 : " + transactionId);
     }
 
