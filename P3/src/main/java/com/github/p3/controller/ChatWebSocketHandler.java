@@ -44,6 +44,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         log.info("메시지 내용: {}", payload);
 
+        // WebSocket 경로에서 채팅방 번호 추출
+        String path = session.getUri().getPath();
+        String transactionIdStr = path.substring(path.lastIndexOf("/") + 1);
+        Long transactionId;
+        try {
+            transactionId = Long.parseLong(transactionIdStr);
+        } catch (NumberFormatException e) {
+            log.error("WebSocket 경로에서 올바른 채팅방 번호를 추출할 수 없습니다: {}", transactionIdStr);
+            return;
+        }
+
         // JSON 메시지 역직렬화
         ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
 
@@ -78,7 +89,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 .receiver(receiverUser.getUserEmail())
                 .message(chatMessage.getMessage())
                 .messageType(chatMessage.getMessageType())
-                .productId(chatMessage.getProduct() != null ? chatMessage.getProduct().getProductId() : null)
+                .transactionId(transactionId)
                 .build();
 
         try {
