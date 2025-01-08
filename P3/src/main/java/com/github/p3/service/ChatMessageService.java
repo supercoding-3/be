@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ChatMessageService {
 
-    Long createChatRoomId(Long productId, String buyerEmail, String sellerEmail);
+    Long createChatRoomId(Long productId);
 
     void saveMessage(ChatMessageDto chatMessageDto);
 

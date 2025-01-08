@@ -27,24 +27,25 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     // 채팅방 번호 조회
     @Override
     @Transactional
-    public Long createChatRoomId(Long productId, String buyerEmail, String sellerEmail) {
+    public Long createChatRoomId(Long productId) {
         // 거래 중인 상품 조회
         Product product = transactionRepository.findByProduct_ProductId(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
                 .getProduct();
-
-        // 사용자 조회 (발신자, 수신자)
-        User buyer = userRepository.findByUserEmail(buyerEmail)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        User seller = userRepository.findByUserEmail(sellerEmail)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 거래 중인 상품에 대한 거래 정보 조회
         Transaction transaction = transactionRepository.findByProduct_ProductIdAndStatus(
                         product.getProductId(), TransactionStatus.거래중)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
 
-        return transaction.getTransactionId(); // 거래 ID 반환 (채팅방 번호)
+        // 거래 정보에서 구매자와 판매자 조회
+        User buyer = userRepository.findByUserId(transaction.getBuyer().getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)); // 구매자 조회
+        User seller = userRepository.findByUserId(transaction.getSeller().getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)); // 판매자 조회
+
+        // 채팅방 번호 반환 (거래 ID)
+        return transaction.getTransactionId();
     }
 
     @Override
