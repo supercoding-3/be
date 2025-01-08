@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +26,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     // 채팅방 번호 조회
     @Override
+    @Transactional
     public Long createChatRoomId(Long productId, String buyerEmail, String sellerEmail) {
         // 거래 중인 상품 조회
         Product product = transactionRepository.findByProduct_ProductId(productId)
@@ -69,6 +73,16 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
         // 채팅 메시지 저장
         chatMessageRepository.save(chatMessage);
+    }
+
+    @Override
+    @Transactional
+    public List<ChatMessageDto> getChatMessages(Long transactionId) {
+        List<ChatMessage> chatMessages = chatMessageRepository.findByTransaction_TransactionId(transactionId);
+
+        return chatMessages.stream()
+                .map(chatMessageMapper::toChatMessageDto)
+                .collect(Collectors.toList());
     }
 
     @Override
