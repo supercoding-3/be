@@ -29,7 +29,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional
     public Long createChatRoomId(Long productId) {
         // 거래 중인 상품 조회
-        Product product = transactionRepository.findByProduct_ProductId(productId)
+        Product product = transactionRepository.findByProductProductId(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND))
                 .getProduct();
 
