@@ -64,6 +64,8 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true); // 쿠키를 포함한 요청 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
+        configuration.addExposedHeader("Access-Control-Allow-Credentials");
+        
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 설정 적용
