@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,9 +49,14 @@ public class UserController {
             Cookie accessTokenCookie = new Cookie("access_token", tokens.get("access_token"));
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge(30 * 60);
+            accessTokenCookie.setMaxAge(30 * 60); // 30분
 
-            response.addCookie(accessTokenCookie);
+            // SameSite 속성을 수동으로 추가하기 위해 쿠키 값을 설정한 후 응답 헤더에 추가
+            String cookieWithSameSite = String.format("%s=%s; HttpOnly; Path=%s; Max-Age=%d; SameSite=None",
+                    accessTokenCookie.getName(), accessTokenCookie.getValue(), accessTokenCookie.getPath(), accessTokenCookie.getMaxAge());
+
+            // CORS를 위한 SameSite 설정 추가
+            response.addHeader(HttpHeaders.SET_COOKIE, cookieWithSameSite);
 
             log.info("로그인 성공: {}", userDto.getUserEmail());
             return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
@@ -62,6 +68,7 @@ public class UserController {
             return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     // 로그아웃
     @PostMapping("/logout")
@@ -75,7 +82,12 @@ public class UserController {
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(0);
 
-            response.addCookie(accessTokenCookie);
+            // 쿠키에 SameSite 속성을 수동으로 추가
+            String cookieWithSameSite = String.format("%s=%s; HttpOnly; Path=%s; Max-Age=%d; SameSite=None",
+                    accessTokenCookie.getName(), accessTokenCookie.getValue(), accessTokenCookie.getPath(), accessTokenCookie.getMaxAge());
+
+            // CORS를 위한 SameSite 설정 추가
+            response.addHeader(HttpHeaders.SET_COOKIE, cookieWithSameSite);
 
             // 리프래시 토큰 삭제 (DB)
             userService.removeRefreshToken(request);
@@ -90,6 +102,7 @@ public class UserController {
             return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     // 계정 비활성화
     @PatchMapping("/deactivate")
