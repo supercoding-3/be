@@ -33,5 +33,9 @@ out/
 /nbdist/
 /.nb-gradle/
 
+key2/
+
 ### VS Code ###
 .vscode/
+
+P3/src/main/resources/application.yaml
