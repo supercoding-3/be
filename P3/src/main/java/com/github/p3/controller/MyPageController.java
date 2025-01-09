@@ -100,25 +100,23 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/my-page/edit/{userId}/profile")
+    @PostMapping("/my-page/edit/profile")
     public ResponseEntity<String> updateUserProfile(
-            @PathVariable Integer userId,
             @RequestParam("newImage") MultipartFile newImage,
             @AuthenticatedUser User currentUser) {
 
-        myPageService.updateUserProfile(userId, newImage, currentUser);
+        myPageService.updateUserProfile(newImage, currentUser);
         return ResponseEntity.ok("유저 프로필 사진 업데이트가 완료되었습니다.");
     }
 
 
-    @PatchMapping("/my-page/edit/{userId}")
+    @PatchMapping("/my-page/edit")
     public ResponseEntity<String> updateUserProfile(
-            @PathVariable Integer userId,  // URL에서 userId를 받음
             @RequestBody UserProfileUpdateDto dto,  // 요청 본문에서 수정할 정보를 받음
             @AuthenticatedUser User currentUser) {  // 인증된 사용자의 정보
 
         // 서비스 로직 호출하여 사용자 정보 수정
-        myPageService.updateUserProfile(currentUser, userId, dto);
+        myPageService.updateUserProfile(currentUser, dto);
 
         return ResponseEntity.ok("유저 프로필이 성공적으로 변경되었습니다.");
     }

@@ -20,7 +20,7 @@ public interface MyPageService {
 
     boolean cancelTransaction(Long transactionId, Integer sellerId);
 
-    void updateUserProfile(Integer userId, MultipartFile newImage, User currentUser);
+    void updateUserProfile(MultipartFile newImage, User currentUser);
 
-    void updateUserProfile(User currentUser, Integer userId, UserProfileUpdateDto dto);
+    void updateUserProfile(User currentUser,UserProfileUpdateDto dto);
 }
