@@ -77,4 +77,9 @@ public class S3Service {
         }
     }
 
+    // 단일 파일 업로드 메서드
+    public String uploadSingleFile(MultipartFile file) {
+        return uploadFileToS3(file); // 내부 private 메서드 호출
+    }
+
 }

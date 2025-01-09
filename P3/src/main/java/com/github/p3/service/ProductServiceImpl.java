@@ -283,7 +283,7 @@ public class ProductServiceImpl implements ProductService {
         product.setProductStatus(ProductStatus.낙찰);
         productRepository.save(product);
 
-        Transaction transaction = transactionMapper.toTransaction(product, buyer, currentUser, bid.getBidPrice());
+        Transaction transaction = transactionMapper.toTransaction(product, buyer, currentUser, bid.getBidPrice(), bid);
         transaction.setStatus(TransactionStatus.거래중); // 초기 상태 설정
         // 트랜잭션 저장
         transactionRepository.save(transaction);

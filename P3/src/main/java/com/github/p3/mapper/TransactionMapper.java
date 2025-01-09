@@ -1,5 +1,8 @@
 package com.github.p3.mapper;
 
+import com.github.p3.dto.TransactionDto;
+import com.github.p3.entity.Bid;
+
 import com.github.p3.entity.Product;
 import com.github.p3.entity.Transaction;
 import com.github.p3.entity.User;
@@ -18,5 +21,7 @@ public interface TransactionMapper {
     @Mapping(target = "completedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "transactionId", ignore = true)
     @Mapping(target = "status", ignore = true)
-    Transaction toTransaction(Product product, User buyer, User seller, BigDecimal bidPrice);
+    @Mapping(target = "bid", source = "bid")
+    Transaction toTransaction(Product product, User buyer, User seller, BigDecimal bidPrice, Bid bid);
+
 }
