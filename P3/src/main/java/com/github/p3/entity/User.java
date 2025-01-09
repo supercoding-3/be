@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -52,11 +53,14 @@ public class User {
         this.userEmail = userEmail;
     }
 
-    @OneToMany(mappedBy = "user")
-    private List<Bid> bids;
+    @OneToMany(fetch = FetchType.EAGER)
+    private Set<Bid> bids;
 
     public boolean hasAward(Long productId) {
         return bids.stream().anyMatch(bid -> bid.getProduct().getProductId().equals(productId) && bid.getBidStatus() == BidStatus.낙찰);
     }
+
+    // 프로필 이미지 URL 필드 추가
+    private String profileImageUrl;
 
 }

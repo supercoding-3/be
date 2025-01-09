@@ -37,4 +37,12 @@ public class Transaction {
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TransactionStatus status = TransactionStatus.거래중; // 초기 상태
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "bid_id")
+    private Bid bid;
 }
