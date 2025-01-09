@@ -205,14 +205,10 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Transactional
     @Override
-    public void updateUserProfile(Integer userId, MultipartFile newImage, User currentUser) {
-        // 현재 사용자가 수정하려는 사용자가 맞는지 확인
-        if (!currentUser.getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한 오류 처리
-        }
+    public void updateUserProfile(MultipartFile newImage, User currentUser) {
 
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 새 이미지 업로드
@@ -234,14 +230,10 @@ public class MyPageServiceImpl implements MyPageService {
 
     @Transactional
     @Override
-    public void updateUserProfile(User currentUser, Integer userId, UserProfileUpdateDto dto) {
-        // 현재 사용자가 수정하려는 사용자가 맞는지 확인
-        if (!currentUser.getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
-        }
+    public void updateUserProfile(User currentUser, UserProfileUpdateDto dto) {
 
         // 사용자 정보 수정 로직
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 비밀번호 확인
