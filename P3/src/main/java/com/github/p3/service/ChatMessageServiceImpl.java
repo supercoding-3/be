@@ -76,6 +76,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         chatMessageRepository.save(chatMessage);
     }
 
+    // 채팅 내용 조회
     @Override
     @Transactional
     public List<ChatMessageDto> getChatMessages(Long transactionId) {
@@ -86,6 +87,19 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                 .collect(Collectors.toList());
     }
 
+    // 채팅 목록 조회
+    @Override
+    @Transactional
+    public List<Long> getActChatRoomIds() {
+        List<Transaction> activeTransactions = transactionRepository.findByStatus(TransactionStatus.거래중);
+
+        return activeTransactions.stream()
+                .map(Transaction::getTransactionId)
+                .collect(Collectors.toList());
+    }
+
+
+    // 채팅방 나가기(삭제)
     @Override
     public void deleteChat(Long chatId) {
         ChatMessage chatMessage = chatMessageRepository.findById(chatId)

@@ -25,7 +25,7 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
     private final ObjectMapper objectMapper;
 
-    // 채팅방 번호
+    // 채팅방 번호 반환
     @PostMapping("/room")
     public ResponseEntity<String> createChatRoom(@RequestBody ChatMessageDto chatMessageDto) {
         Long transactionId = chatMessageService.createChatRoomId(chatMessageDto.getProductId());
@@ -50,12 +50,21 @@ public class ChatController {
         }
     }
 
+    // 채팅 내용 조회
     @GetMapping("/room/{transactionId}")
     public ResponseEntity<List<ChatMessageDto>> getChatMessages(@PathVariable Long transactionId) {
         List<ChatMessageDto> chatMessages = chatMessageService.getChatMessages(transactionId);
         return ResponseEntity.ok(chatMessages);
     }
 
+    // 채팅 목록 조회
+    @GetMapping("/rooms")
+    public ResponseEntity<List<Long>> getChatRoomList() {
+        List<Long> chatRoomIds = chatMessageService.getActChatRoomIds();
+        return ResponseEntity.ok(chatRoomIds);
+    }
+
+    // 채팅방 나가기(삭제)
     @DeleteMapping("/{chatId}")
     public ResponseEntity<String> deleteChat(@PathVariable Long chatId) {
         chatMessageService.deleteChat(chatId);
