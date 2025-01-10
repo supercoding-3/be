@@ -47,12 +47,12 @@ public class UserController {
 
             // Access Token 쿠키 설정
             Cookie accessTokenCookie = new Cookie("access_token", tokens.get("access_token"));
-            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setHttpOnly(false);
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(30 * 60); // 30분
 
             // SameSite 속성을 수동으로 추가하기 위해 쿠키 값을 설정한 후 응답 헤더에 추가
-            String cookieWithSameSite = String.format("%s=%s; HttpOnly; Path=%s; Max-Age=%d; SameSite=None",
+            String cookieWithSameSite = String.format("%s=%s; Path=%s; Max-Age=%d; SameSite=None",
                     accessTokenCookie.getName(), accessTokenCookie.getValue(), accessTokenCookie.getPath(), accessTokenCookie.getMaxAge());
 
             // CORS를 위한 SameSite 설정 추가
@@ -78,12 +78,12 @@ public class UserController {
         try {
             // Access Token 쿠키 만료
             Cookie accessTokenCookie = new Cookie("access_token", null);
-            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setHttpOnly(false);
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(0);
 
             // 쿠키에 SameSite 속성을 수동으로 추가
-            String cookieWithSameSite = String.format("%s=%s; HttpOnly; Path=%s; Max-Age=%d; SameSite=None",
+            String cookieWithSameSite = String.format("%s=%s; Path=%s; Max-Age=%d; SameSite=None",
                     accessTokenCookie.getName(), accessTokenCookie.getValue(), accessTokenCookie.getPath(), accessTokenCookie.getMaxAge());
 
             // CORS를 위한 SameSite 설정 추가
