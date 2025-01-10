@@ -12,6 +12,7 @@ import lombok.*;
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "chat_id")
     private Long chatId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,10 +26,14 @@ public class ChatMessage {
     private String message;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "message_type")
     private MessageType messageType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transaction_id")
+    private Transaction transaction;
 }

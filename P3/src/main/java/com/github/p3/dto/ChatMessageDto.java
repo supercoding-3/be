@@ -1,7 +1,6 @@
 package com.github.p3.dto;
 
 import com.github.p3.entity.MessageType;
-import com.github.p3.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,12 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChatMessageDto {
 
-    private Long chatId;
+    private Long transactionId;
     private String sender;
     private String receiver;
     private String message;
     private MessageType messageType;
-
-    private Product productId;
-
+    private Long productId;
 }
