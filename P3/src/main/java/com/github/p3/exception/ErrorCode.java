@@ -1,5 +1,6 @@
 package com.github.p3.exception;
 
+import com.github.p3.entity.Transaction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public enum ErrorCode {
     INVALID_BID_AMOUNT_LOW(HttpStatus.BAD_REQUEST, "입력된 가격이 현재 입찰가보다 낮습니다."),
 
     // 사용자
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"구매자를 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND,"유저를 찾을 수 없습니다."),
 
     // 입찰
     BID_NOT_FOUND(HttpStatus.NOT_FOUND,"입찰 정보를 찾을 수 없습니다."),
@@ -47,8 +48,12 @@ public enum ErrorCode {
     // 채팅
     SENDER_NOT_FOUND(HttpStatus.NOT_FOUND, "발신자를 찾을 수 없습니다"),
     RECEIVER_NOT_FOUND(HttpStatus.NOT_FOUND, "수신자를 찾을 수 없습니다."),
-    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "거래 중인 상품을 찾을 수 없습니다."),
+
     CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 메시지를 찾을 수 없습니다.");
+
+    // 거래
+    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND,"거래중이 아니거나 거래가 완료된 상품입니다.");
+
 
     private final HttpStatus status;
     private final String message;

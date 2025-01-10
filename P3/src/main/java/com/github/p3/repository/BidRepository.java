@@ -15,4 +15,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     List<Bid> findByProductProductIdOrderByBidCreatedAtDesc(Long productId);
 
     Optional<Bid> findByProductAndBidStatusAndUser(Product product, BidStatus bidStatus, User sender);
+
+    List<Bid> findByUser_UserId(Integer userId);  // User 엔티티의 userId를 기준으로 조회
 }
