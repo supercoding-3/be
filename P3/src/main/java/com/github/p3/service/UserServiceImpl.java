@@ -132,6 +132,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void removeRefreshToken(HttpServletRequest request) {
         String accessToken = Arrays.stream(request.getCookies())
                 .filter(cookie -> "access_token".equals(cookie.getName()))
