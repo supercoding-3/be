@@ -1,6 +1,7 @@
 package com.github.p3.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -67,6 +68,7 @@ public class Product {
     private List<Image> images = new ArrayList<>(); // 여러 이미지를 관리할 수 있는 필드
 
     // 입찰 리스트 (Bid 엔티티와의 관계)
+    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bid> bids = new ArrayList<>(); // 상품에 대한 모든 입찰
 
