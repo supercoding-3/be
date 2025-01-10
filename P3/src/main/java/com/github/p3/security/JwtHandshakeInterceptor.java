@@ -3,6 +3,7 @@ package com.github.p3.security;
 import com.github.p3.entity.User;
 import com.github.p3.repository.UserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,9 +88,25 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     private boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
+                    .build()
+                    .parseClaimsJws(token); // 토큰 파싱
             return true;
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.error("JWT 만료: {}", e.getMessage());
+            return false;
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            log.error("잘못된 JWT 형식: {}", e.getMessage());
+            return false;
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            log.error("지원되지 않는 JWT: {}", e.getMessage());
+            return false;
+        } catch (JwtException e) {
+            log.error("JWT 검증 오류: {}", e.getMessage());
+            return false;
         } catch (Exception e) {
+            log.error("알 수 없는 오류: {}", e.getMessage());
             return false;
         }
     }
