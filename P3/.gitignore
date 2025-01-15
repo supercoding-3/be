@@ -36,4 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
+key2/
+
 P3/src/main/resources/application.yaml
