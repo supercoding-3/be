@@ -238,7 +238,7 @@ public class MyPageServiceImpl implements MyPageService {
 
         // 비밀번호 확인
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
         }
 
         // 비밀번호 변경 (비밀번호는 암호화해서 저장)
