@@ -2,7 +2,6 @@ package com.github.p3.mapper;
 
 import com.github.p3.dto.TransactionDto;
 import com.github.p3.entity.Bid;
-
 import com.github.p3.entity.Product;
 import com.github.p3.entity.Transaction;
 import com.github.p3.entity.User;
@@ -13,6 +12,7 @@ import java.math.BigDecimal;
 
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {
+
 
     @Mapping(target = "product", source = "product")
     @Mapping(target = "buyer", source = "buyer")
