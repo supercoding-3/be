@@ -19,7 +19,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Optional<Transaction> findByProduct_ProductIdAndStatus(Long productId, TransactionStatus status);
 
     List<Transaction> findByStatus(TransactionStatus transactionStatus);
-  
+
     // productId를 기준으로 거래 정보를 조회
     Optional<Transaction> findByProduct_ProductId(Long productId);
+
 }

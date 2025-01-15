@@ -64,20 +64,16 @@ public class ProductServiceImpl implements ProductService {
         // 상품 조회
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        log.debug("Product ID: {}", productId);
-        log.debug("Product Title: {}", product.getTitle());
 
         // 현재 사용자가 판매자인지 여부 확인
         boolean isSeller = product.getUser().equals(currentUser);
-        log.debug("Current User: {}", currentUser.getUserEmail());
-        log.debug("Is Seller: {}", isSeller);
 
         // 최신 입찰 조회
         Bid latestBid = bidRepository.findTopByProductProductIdOrderByBidCreatedAtDesc(productId).orElse(null);
-        log.debug("Latest Bid: {}", latestBid);
+
         // 모든 입찰 목록 조회
         List<Bid> allBids = bidRepository.findByProductProductIdOrderByBidCreatedAtDesc(productId);
-        log.debug("All Bids Count: {}", allBids.size());
+
 
         // 상품에 속한 이미지 조회
         List<String> imageUrls = product.getImages().stream()
@@ -116,7 +112,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 현재 사용자가 판매자인지 확인
-        if (!product.getUser().equals(currentUser)) {
+        if (!product.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
         }
 
@@ -131,9 +127,9 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // 권한 확인
-        if (!existingProduct.getUser().equals(currentUser)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        // 현재 사용자가 판매자인지 확인
+        if (!existingProduct.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
         }
 
         // 상품 정보 업데이트 (수정된 필드만 반영)
@@ -188,9 +184,9 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // 권한 확인: 상품의 주인과 현재 사용자가 일치하는지 확인
-        if (!existingProduct.getUser().equals(currentUser)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        // 현재 사용자가 판매자인지 확인
+        if (!existingProduct.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
         }
 
         // S3에서 파일 삭제 (상품에 연결된 이미지들이 있을 경우)

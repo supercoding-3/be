@@ -30,6 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws IOException, ServletException {
 
+        // 로그인, 회원가입, Swagger 관련 URL은 필터에서 제외
         if (request.getRequestURI().equals("/api/user/login") ||
                 request.getRequestURI().equals("/api/user/signup") ||
                 request.getRequestURI().startsWith("/api/products/all") ||
@@ -43,56 +44,67 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            // 쿠키에서 액세스 토큰 가져오기
+            // 요청에서 액세스 토큰 가져오기
             String accessToken = getTokenFromRequest(request);
-            System.out.println(accessToken + " 엑세스 토큰을 가져왔습니다.");
-            System.out.println("Is token valid? " + jwtTokenProvider.validateToken(accessToken));
 
             if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
-                // 액세스 토큰 유효 => 이메일 추출
+                // 액세스 토큰이 유효하다면, 이메일 추출
                 String userEmail = jwtTokenProvider.extractUserEmail(accessToken);
-                System.out.println("추출된 이메일: " + userEmail);  // 이메일 추출 전 로그
 
                 if (userEmail != null) {
-                    System.out.println(userEmail + " 이메일을 추출하였습니다.");
-                    // 리프레시 토큰 찾기 (DB)
+                    // 유저의 리프레시 토큰을 DB에서 찾아서 삭제하지 않음
                     Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByUserEmail(userEmail);
-                    // 해당 유저의 리프레시 토큰 처리 (예: 삭제)
-                    refreshTokenOpt.ifPresent(refreshTokenRepository::delete);
 
-                    // 액세스 토큰으로 인증 처리 (필요한 경우 SecurityContext 설정)
+                    // 리프레시 토큰이 존재하고 만료되지 않았으면 삭제하지 않음
+                    refreshTokenOpt.ifPresent(refreshToken -> {
+                        if (!jwtTokenProvider.validateToken(refreshToken.getRefreshToken())) {
+                            refreshTokenRepository.delete(refreshToken);  // 만료된 리프레시 토큰만 삭제
+                        }
+                    });
+
+                    // 인증 처리: SecurityContext에 인증 정보 설정
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userEmail, null, new ArrayList<>());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "이메일을 추출할 수 없습니다.");
                     return;
                 }
+            } else if (accessToken != null && !jwtTokenProvider.validateToken(accessToken)) {
+                // 액세스 토큰이 만료되었을 경우, 리프레시 토큰을 사용하여 갱신
+                String refreshToken = getRefreshTokenFromRequest(request);
+
+                if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
+                    String newAccessToken = jwtTokenProvider.refreshAccessToken(refreshToken);
+                    response.setHeader("Authorization", "Bearer " + newAccessToken);  // 새로운 액세스 토큰을 헤더에 설정
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다.");
+                    return;
+                }
             } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 액세스 토큰");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 액세스 토큰.");
                 return;
             }
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰.");
             return;
         }
 
         filterChain.doFilter(request, response);  // 필터 체인 진행
     }
 
-    // 쿠키 및 쿼리 파라미터에서 액세스 토큰을 가져오는 메서드
+    // 요청에서 액세스 토큰을 가져오는 메서드 (쿠키 또는 쿼리 파라미터에서)
     private String getTokenFromRequest(HttpServletRequest request) {
         String token = getTokenFromCookie(request);
         if (token != null) {
             return token;
         }
 
-        // 쿠키에 토큰이 없다면 쿼리 파라미터에서 토큰을 가져옴
+        // 쿠키에서 토큰이 없으면 쿼리 파라미터에서 가져옴
         return getTokenFromQueryParam(request);
     }
 
     // 쿠키에서 액세스 토큰을 가져오는 메서드
     private String getTokenFromCookie(HttpServletRequest request) {
-        // 쿠키에서 액세스 토큰 가져오기
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("access_token".equals(cookie.getName())) {
@@ -109,6 +121,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && !token.isEmpty()) {
             return token;
         }
+        return null;
+    }
+
+    // 요청에서 리프레시 토큰을 가져오는 메서드
+    private String getRefreshTokenFromRequest(HttpServletRequest request) {
+        String refreshToken = request.getHeader("Refresh-Token");
+        if (refreshToken != null && !refreshToken.isEmpty()) {
+            return refreshToken;
+        }
+
         return null;
     }
 }
