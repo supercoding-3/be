@@ -5,14 +5,12 @@ import com.github.p3.entity.Bid;
 import com.github.p3.entity.Transaction;
 import com.github.p3.entity.TransactionStatus;
 import com.github.p3.entity.User;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-
 
     // 거래 아이디로 거래를 찾을 때 사용
     Optional<Transaction> findByProductProductId(Long transactionId);
@@ -26,4 +24,3 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Optional<Transaction> findByProduct_ProductId(Long productId);
 
 }
-

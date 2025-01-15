@@ -1,6 +1,5 @@
 package com.github.p3.mapper;
 
-
 import com.github.p3.dto.TransactionDto;
 import com.github.p3.entity.Bid;
 import com.github.p3.entity.Product;
@@ -26,4 +25,3 @@ public interface TransactionMapper {
     Transaction toTransaction(Product product, User buyer, User seller, BigDecimal bidPrice, Bid bid);
 
 }
-

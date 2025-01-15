@@ -33,6 +33,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 로그인, 회원가입, Swagger 관련 URL은 필터에서 제외
         if (request.getRequestURI().equals("/api/user/login") ||
                 request.getRequestURI().equals("/api/user/signup") ||
+                request.getRequestURI().startsWith("/api/products/all") ||
+                request.getRequestURI().startsWith("/api/products/{id}") ||
+                request.getRequestURI().startsWith("/api/products/category/{category}") ||
                 request.getRequestURI().startsWith("/v3/api-docs") ||
                 request.getRequestURI().startsWith("/swagger-ui") ||
                 request.getRequestURI().equals("/swagger-ui/index.html")) {
