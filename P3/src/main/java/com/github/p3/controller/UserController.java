@@ -49,8 +49,11 @@ public class UserController {
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(30 * 60);
+            accessTokenCookie.setSecure(true);  // HTTPS에서만 쿠키 전송
 
-            response.addCookie(accessTokenCookie);
+            // SameSite 속성 수동 설정
+            response.addHeader("Set-Cookie", "access_token=" + tokens.get("access_token") +
+                    "; HttpOnly; Secure; Path=/; Max-Age=" + (30 * 60) + "; SameSite=None");
 
             log.info("로그인 성공: {}", userDto.getUserEmail());
             return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
@@ -74,8 +77,10 @@ public class UserController {
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(0);
+            accessTokenCookie.setSecure(true);  // HTTPS에서만 쿠키 전송
 
-            response.addCookie(accessTokenCookie);
+            // SameSite 속성 수동 설정
+            response.addHeader("Set-Cookie", "access_token=null; HttpOnly; Secure; Path=/; Max-Age=0; SameSite=None");
 
             // 리프래시 토큰 삭제 (DB)
             userService.removeRefreshToken(request);
