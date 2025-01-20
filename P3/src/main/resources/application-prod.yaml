@@ -4,7 +4,7 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:mariadb://database-bid.czow0sc64bbc.ap-northeast-2.rds.amazonaws.com:3306/p3?useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mariadb://database-bid.czow0sc64bbc.ap-northeast-2.rds.amazonaws.com:3306/p3?useUnicode=true&characterEncoding=utf8mb4&connectionCollation=utf8mb4_general_ci
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
