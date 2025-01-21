@@ -55,7 +55,8 @@ public class UserController {
             response.addHeader("Set-Cookie", "access_token=" + tokens.get("access_token") +
                     "; HttpOnly; Secure; Path=/; Max-Age=" + (30 * 60) + "; SameSite=None");
 
-            log.info("로그인 성공: {}", userDto.getUserEmail());
+            log.info("로그인 성공: 이메일={}, 액세스 토큰={}", userDto.getUserEmail(), accessTokenCookie.getValue());
+
             return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
         } catch (CustomException e) {
             log.warn("로그인 실패: {}", e.getMessage());
