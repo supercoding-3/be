@@ -1,6 +1,7 @@
 package com.github.p3.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,7 @@ public class S3Service {
             metadata.setContentType(file.getContentType()); // 파일 타입 설정 (선택 사항)
 
             // S3에 파일 업로드
-            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
+            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata) .withCannedAcl(CannedAccessControlList.PublicRead));
 
             // 업로드한 파일의 URL 반환
             return amazonS3.getUrl(bucketName, fileName).toString();
