@@ -236,13 +236,10 @@ public class MyPageServiceImpl implements MyPageService {
         User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 비밀번호 확인
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
-        }
-
-        // 비밀번호 변경 (비밀번호는 암호화해서 저장)
         if (dto.getPassword() != null) {
+            if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+                throw new CustomException(ErrorCode.INCORRECT_PASSWORD);
+            }
             user.setUserPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
