@@ -23,4 +23,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     // productId를 기준으로 거래 정보를 조회
     Optional<Transaction> findByProduct_ProductId(Long productId);
 
+    List<Transaction> findByBuyer_UserIdOrSeller_UserId(Integer buyer_userId, Integer seller_userId);
 }

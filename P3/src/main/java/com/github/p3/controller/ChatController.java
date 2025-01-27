@@ -2,12 +2,15 @@ package com.github.p3.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.p3.dto.ChatMessageDto;
+import com.github.p3.dto.ChatRoomListDto;
 import com.github.p3.service.ChatMessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -58,10 +61,16 @@ public class ChatController {
     }
 
     // 채팅 목록 조회
+//    @GetMapping("/rooms")
+//    public ResponseEntity<List<Long>> getChatRoomList() {
+//        List<Long> chatRoomIds = chatMessageService.getActChatRoomIds();
+//        return ResponseEntity.ok(chatRoomIds);
+//    }
+
     @GetMapping("/rooms")
-    public ResponseEntity<List<Long>> getChatRoomList() {
-        List<Long> chatRoomIds = chatMessageService.getActChatRoomIds();
-        return ResponseEntity.ok(chatRoomIds);
+    public ResponseEntity<List<ChatRoomListDto>> getChatRooms(Authentication authentication) {
+        List<ChatRoomListDto> chatRoomList = chatMessageService.getChatRoomList(authentication);
+        return ResponseEntity.ok(chatRoomList);
     }
 
     // 채팅방 나가기(삭제)

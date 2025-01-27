@@ -1,17 +1,21 @@
 package com.github.p3.service;
 
 import com.github.p3.dto.ChatMessageDto;
+import com.github.p3.dto.ChatRoomListDto;
 import com.github.p3.entity.*;
 import com.github.p3.exception.CustomException;
 import com.github.p3.exception.ErrorCode;
 import com.github.p3.mapper.ChatMessageMapper;
+import com.github.p3.mapper.ChatRoomMapper;
 import com.github.p3.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +27,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+    private final ChatRoomMapper chatRoomMapper;
 
     // 채팅방 번호 조회
     @Override
@@ -88,16 +93,35 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     // 채팅 목록 조회
-    @Override
+//    @Override
+//    @Transactional
+//    public List<Long> getActChatRoomIds() {
+//        List<Transaction> activeTransactions = transactionRepository.findByStatus(TransactionStatus.거래중);
+//
+//        return activeTransactions.stream()
+//                .map(Transaction::getTransactionId)
+//                .collect(Collectors.toList());
+//    }
+
     @Transactional
-    public List<Long> getActChatRoomIds() {
-        List<Transaction> activeTransactions = transactionRepository.findByStatus(TransactionStatus.거래중);
+    @Override
+    public List<ChatRoomListDto> getChatRoomList(Authentication authentication) {
+        // authentication.getName()에서 이메일을 얻고, 이를 userId로 변환하는 로직
+        String userEmail = authentication.getName();  // 이메일 추출
+        Optional<User> user = userRepository.findByUserEmail(userEmail);  // 이메일로 사용자 조회
 
-        return activeTransactions.stream()
-                .map(Transaction::getTransactionId)
-                .collect(Collectors.toList());
+        if (user.isPresent()) {
+            Integer currentUserId = user.get().getUserId();  // 사용자 ID 가져오기
+
+            List<Transaction> transactions = transactionRepository.findByBuyer_UserIdOrSeller_UserId(currentUserId, currentUserId);
+
+            return transactions.stream()
+                    .map(transaction -> chatRoomMapper.toDtoWithOppositeProfile(transaction, currentUserId))
+                    .collect(Collectors.toList());
+        } else {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
     }
-
 
     // 채팅방 나가기(삭제)
     @Override
