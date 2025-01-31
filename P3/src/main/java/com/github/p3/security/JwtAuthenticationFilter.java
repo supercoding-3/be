@@ -34,7 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException, ServletException {
 
         // 특정 URL은 필터에서 제외
-        if (isExcludedUrl(request.getRequestURI())) {
+        if (request.getRequestURI().equals("/api/user/login") ||
+                request.getRequestURI().equals("/api/user/signup") ||
+                request.getRequestURI().startsWith("/api/products/all") ||
+                request.getRequestURI().startsWith("/api/products/{id}") ||
+                request.getRequestURI().startsWith("/api/products/category/{category}") ||
+                request.getRequestURI().startsWith("/v3/api-docs") ||
+                request.getRequestURI().startsWith("/swagger-ui") ||
+                request.getRequestURI().equals("/swagger-ui/index.html")) {
             filterChain.doFilter(request, response);
             return;
         }
