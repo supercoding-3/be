@@ -2,6 +2,7 @@ package com.github.p3.controller;
 
 import com.github.p3.dto.UserDto;
 import com.github.p3.exception.CustomException;
+import com.github.p3.security.JwtTokenProvider;
 import com.github.p3.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
     @PostMapping("/signup")
@@ -109,6 +111,36 @@ public class UserController {
             log.error("계정 비활성화 중 서버 오류 발생", e);
             return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    // 로그인 여부 확인
+    @GetMapping("/check-login")
+    public ResponseEntity<Boolean> checkLogin(HttpServletRequest request) {
+        try {
+            String accessToken = getTokenFromRequest(request);
+
+            if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
+                log.info("로그인 상태 확인: true");
+                return ResponseEntity.ok(true);
+            } else {
+                log.info("로그인 상태 확인: false");
+                return ResponseEntity.ok(false);
+            }
+        } catch (Exception e) {
+            log.error("로그인 확인 중 오류 발생", e);
+            return ResponseEntity.ok(false);
+        }
+    }
+
+    private String getTokenFromRequest(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("access_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 
 }
