@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 특정 URL은 필터에서 제외
         if (request.getRequestURI().equals("/api/user/login") ||
+                request.getRequestURI().equals("/api/user/check-login") ||
                 request.getRequestURI().equals("/api/user/signup") ||
                 request.getRequestURI().startsWith("/api/products/all") ||
                 request.getRequestURI().startsWith("/api/products/{id}") ||
