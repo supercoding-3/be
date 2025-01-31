@@ -1,5 +1,5 @@
 server:
-  port: 8443  # 포트를 8443으로 변경
+  port: 8080
   ssl:
     key-store: "classpath:keystore.p12"
     key-store-type: PKCS12

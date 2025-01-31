@@ -51,10 +51,7 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
-                .requiresChannel(channel -> channel
-                .requestMatchers("/**").requiresSecure()); // HTTPS 리디렉션 강제
-
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
         return http.build(); // 설정을 빌드하여 반환
     }
