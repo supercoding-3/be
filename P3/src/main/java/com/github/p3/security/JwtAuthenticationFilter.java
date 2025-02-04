@@ -2,7 +2,6 @@ package com.github.p3.security;
 
 import com.github.p3.entity.RefreshToken;
 import com.github.p3.repository.RefreshTokenRepository;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -66,31 +65,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    // 특정 URL 필터링 제외 여부 확인
-    private boolean isExcludedUrl(String requestUri) {
-        return requestUri.matches("(/api/user/(login|signup)|/api/products/(all|\\{id}|category/\\{category})|/v3/api-docs|/swagger-ui(/index.html)?)");
-    }
-
     // 액세스 토큰 처리
     private void processAccessToken(HttpServletRequest request, HttpServletResponse response, String accessToken) throws IOException {
-        try {
-            if (jwtTokenProvider.validateToken(accessToken)) {
-                setAuthenticationFromAccessToken(accessToken);
-            }
-        } catch (ExpiredJwtException e) {
+        // 1. 액세스 토큰이 만료되었는지 먼저 확인
+        if (jwtTokenProvider.isTokenExpired(accessToken)) {
             log.info("액세스 토큰이 만료되었습니다. 리프레시 토큰 처리 시작...");
             String refreshToken = getRefreshTokenFromRequest(request);
 
             if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
                 log.info("유효한 리프레시 토큰입니다. 새 액세스 토큰을 생성합니다.");
+
                 String newAccessToken = jwtTokenProvider.refreshAccessToken(refreshToken);
                 storeNewAccessTokenInCookie(response, newAccessToken);
                 setAuthenticationFromAccessToken(newAccessToken);
+                return;
             } else {
                 log.warn("유효하지 않은 리프레시 토큰입니다.");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다.");
-                throw new SecurityException("리프레시 토큰이 유효하지 않습니다.");
+                return;
             }
+        }
+
+        // 2. 만료되지 않았다면 기존 검증 로직 실행
+        if (jwtTokenProvider.validateToken(accessToken)) {
+            setAuthenticationFromAccessToken(accessToken);
+        } else {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "액세스 토큰이 유효하지 않습니다.");
         }
     }
 
