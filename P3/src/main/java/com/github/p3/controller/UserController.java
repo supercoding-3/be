@@ -50,12 +50,12 @@ public class UserController {
             Cookie accessTokenCookie = new Cookie("access_token", tokens.get("access_token"));
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge(-1);
+            accessTokenCookie.setMaxAge(3600);
             accessTokenCookie.setSecure(true);  // HTTPS에서만 쿠키 전송
 
             // SameSite 속성 수동 설정
             response.addHeader("Set-Cookie", "access_token=" + tokens.get("access_token") +
-                    "; HttpOnly; Secure; Path=/; Max-Age=-1" + "; SameSite=None");
+                    "; HttpOnly; Secure; Path=/; Max-Age=3600" + "; SameSite=None");
 
             log.info("로그인 성공: 이메일={}, 액세스 토큰={}", userDto.getUserEmail(), accessTokenCookie.getValue());
 
