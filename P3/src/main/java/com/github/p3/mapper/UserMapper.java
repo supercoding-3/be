@@ -8,11 +8,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    // User 엔티티를 UserDto로 변환
-    @Mapping(target = "userIsDeleted", source = "userIsDeleted", defaultValue = "false")
+    @Mapping(target = "userCreatedAt", source = "userCreatedAt")
+    @Mapping(target = "userUpdatedAt", source = "userUpdatedAt")
+    @Mapping(target = "userIsDeleted", source = "userIsDeleted")
+    @Mapping(target = "profileImageUrl", source = "profileImageUrl")
     UserDto toUserDto(User user);
 
-    // UserDto를 User 엔티티로 변환
     @Mapping(target = "userIsDeleted", source = "userIsDeleted", defaultValue = "false")
     @Mapping(target = "userCreatedAt", ignore = true)
     @Mapping(target = "userUpdatedAt", ignore = true)
