@@ -1,7 +1,9 @@
 package com.github.p3.controller;
 
 import com.github.p3.dto.UserDto;
+import com.github.p3.entity.User;
 import com.github.p3.exception.CustomException;
+import com.github.p3.mapper.UserMapper;
 import com.github.p3.security.JwtTokenProvider;
 import com.github.p3.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -24,6 +26,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserMapper userMapper;
 
     // 회원가입
     @PostMapping("/signup")
@@ -40,11 +43,14 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDto userDto, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody UserDto userDto, HttpServletResponse response) {
         try {
             log.info("로그인 시도: {}", userDto.getUserEmail());
 
             Map<String, String> tokens = userService.login(userDto.getUserEmail(), userDto.getUserPassword());
+
+            User user = userService.findByEmail(userDto.getUserEmail());
+            UserDto responseDto = userMapper.toUserDto(user);
 
             // Access Token 쿠키 설정
             Cookie accessTokenCookie = new Cookie("access_token", tokens.get("access_token"));
@@ -58,8 +64,7 @@ public class UserController {
                     "; HttpOnly; Secure; Path=/; Max-Age=3600" + "; SameSite=None");
 
             log.info("로그인 성공: 이메일={}, 액세스 토큰={}", userDto.getUserEmail(), accessTokenCookie.getValue());
-
-            return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
+            return ResponseEntity.ok(responseDto);
         } catch (CustomException e) {
             log.warn("로그인 실패: {}", e.getMessage());
             return new ResponseEntity<>(e.getMessage(), e.getErrorCode().getStatus());
@@ -115,13 +120,21 @@ public class UserController {
 
     // 로그인 여부 확인
     @GetMapping("/check-login")
-    public ResponseEntity<Boolean> checkLogin(HttpServletRequest request) {
+    public ResponseEntity<?> checkLogin(HttpServletRequest request) {
         try {
             String accessToken = getTokenFromRequest(request);
 
             if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
-                log.info("로그인 상태 확인: true");
-                return ResponseEntity.ok(true);
+                String username = jwtTokenProvider.getUsernameFromToken(accessToken);
+                User user = userService.findByEmail(username);
+
+                if (user != null) {
+                    UserDto responseDto = userMapper.toUserDto(user);
+                    log.info("로그인 상태 확인: true");
+                    return ResponseEntity.ok(responseDto);
+                } else {
+                    return ResponseEntity.ok(false); // 사용자 정보 없으면 false
+                }
             } else {
                 log.info("로그인 상태 확인: false");
                 return ResponseEntity.ok(false);

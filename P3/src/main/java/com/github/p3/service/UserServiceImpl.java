@@ -164,4 +164,10 @@ public class UserServiceImpl implements UserService {
         user.setUserIsDeleted(true);
         userRepository.save(user);
     }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+    }
 }

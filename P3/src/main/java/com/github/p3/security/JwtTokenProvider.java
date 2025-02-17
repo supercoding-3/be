@@ -99,4 +99,8 @@ public class JwtTokenProvider {
         String userEmail = extractUserEmail(refreshToken);
         return generateAccessToken(userEmail);
     }
+
+    public String getUsernameFromToken(String accessToken) {
+        return extractUserEmail(accessToken);
+    }
 }

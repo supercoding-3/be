@@ -1,6 +1,7 @@
 package com.github.p3.service;
 
 import com.github.p3.dto.UserDto;
+import com.github.p3.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Map;
@@ -14,4 +15,6 @@ public interface UserService {
     void removeRefreshToken(HttpServletRequest request);
     // 계정 비활성화
     void deactivateAccount(String userEmail, String userPassword);
+
+    User findByEmail(String userEmail);
 }
