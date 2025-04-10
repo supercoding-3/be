@@ -28,24 +28,21 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
     private final ObjectMapper objectMapper;
 
-    // 채팅방 번호 반환
+    // 채팅방 생성
     @PostMapping("/room")
     public ResponseEntity<String> createChatRoom(@RequestBody ChatMessageDto chatMessageDto) {
-        Long transactionId = chatMessageService.createChatRoomId(chatMessageDto.getProductId());
-        return ResponseEntity.ok("채팅방 생성 : " + transactionId);
+        Long chatRoomId = chatMessageService.createChatRoomId(chatMessageDto.getProductId());
+        return ResponseEntity.ok("채팅방 생성 : " + chatRoomId);
     }
 
-    // WebSocket에서 메시지를 보내는 부분
-    @MessageMapping("/room/{transactionId}")
-    public void sendMessage(@PathVariable Long transactionId, @Payload ChatMessageDto chatMessageDto, WebSocketSession session) {
-        chatMessageDto.setTransactionId(transactionId);
+    // WebSocket 메시지 전송
+    @MessageMapping("/room/{chatRoomId}")
+    public void sendMessage(@PathVariable Long chatRoomId, @Payload ChatMessageDto chatMessageDto, WebSocketSession session) {
+        chatMessageDto.setChatRoomId(chatRoomId);
 
-        // 메시지 저장
-        chatMessageService.saveMessage(chatMessageDto);
+        chatMessageService.saveMessage(chatMessageDto); // 메시지 저장
 
-        // 채팅 메시지를 해당 사용자에게 전송
         try {
-            // 메시지 전송
             TextMessage message = new TextMessage(objectMapper.writeValueAsString(chatMessageDto));
             session.sendMessage(message);
         } catch (IOException e) {
@@ -54,19 +51,13 @@ public class ChatController {
     }
 
     // 채팅 내용 조회
-    @GetMapping("/room/{transactionId}")
-    public ResponseEntity<List<ChatMessageDto>> getChatMessages(@PathVariable Long transactionId) {
-        List<ChatMessageDto> chatMessages = chatMessageService.getChatMessages(transactionId);
+    @GetMapping("/room/{chatRoomId}")
+    public ResponseEntity<List<ChatMessageDto>> getChatMessages(@PathVariable("chatRoomId") Long chatRoomId) {
+        List<ChatMessageDto> chatMessages = chatMessageService.getChatMessages(chatRoomId);
         return ResponseEntity.ok(chatMessages);
     }
 
-    // 채팅 목록 조회
-//    @GetMapping("/rooms")
-//    public ResponseEntity<List<Long>> getChatRoomList() {
-//        List<Long> chatRoomIds = chatMessageService.getActChatRoomIds();
-//        return ResponseEntity.ok(chatRoomIds);
-//    }
-
+    // 채팅방 목록 조회
     @GetMapping("/rooms")
     public ResponseEntity<List<ChatRoomListDto>> getChatRooms(Authentication authentication) {
         List<ChatRoomListDto> chatRoomList = chatMessageService.getChatRoomList(authentication);
@@ -78,6 +69,6 @@ public class ChatController {
     public ResponseEntity<String> deleteChat(@PathVariable Long chatId) {
         chatMessageService.deleteChat(chatId);
         log.info("{} 채팅 삭제 완료", chatId);
-        return ResponseEntity.ok("채팅 메시지가 삭제되었습니다.");  // 204 No Content 응답
+        return ResponseEntity.ok("채팅 메시지가 삭제되었습니다.");
     }
 }

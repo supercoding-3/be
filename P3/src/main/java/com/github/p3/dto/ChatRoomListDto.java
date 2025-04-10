@@ -17,4 +17,5 @@ public class ChatRoomListDto {
     private String productProfileImageUrl;
     private String oppositeNickname;   // 상대방 닉네임
     private String oppositeProfileImageUrl; // 상대방 프로필 이미지 URL
+    private String receiverEmail;
 }

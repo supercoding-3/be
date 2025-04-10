@@ -89,7 +89,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 .receiver(receiverUser.getUserEmail())
                 .message(chatMessage.getMessage())
                 .messageType(chatMessage.getMessageType())
-                .transactionId(transactionId)
+                .chatRoomId(transactionId)
                 .build();
 
         try {

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChatMessageDto {
 
-    private Long transactionId;
+    private Long chatRoomId;
     private String sender;
     private String receiver;
     private String message;

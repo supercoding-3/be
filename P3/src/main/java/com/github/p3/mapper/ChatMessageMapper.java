@@ -8,13 +8,13 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ChatMessageMapper {
 
-    @Mapping(target = "sender.userEmail", source = "sender") // 이메일을 통해 사용자 조회
+    @Mapping(target = "sender.userEmail", source = "sender")
     @Mapping(target = "receiver.userEmail", source = "receiver")
-    @Mapping(target = "transaction.transactionId", source = "transactionId") // 거래 ID로 설정
-    @Mapping(target = "product.productId", source = "productId") // 상품 ID로 설정
+    @Mapping(target = "transaction.transactionId", source = "chatRoomId") // 여기를 수정!
+    @Mapping(target = "product.productId", source = "productId")
     ChatMessage toChatMessageEntity(ChatMessageDto chatMessageDto);
 
-    @Mapping(target = "transactionId", source = "transaction.transactionId")
+    @Mapping(target = "chatRoomId", source = "transaction.transactionId") // 여기도 통일!
     @Mapping(target = "sender", source = "sender.userEmail")
     @Mapping(target = "receiver", source = "receiver.userEmail")
     @Mapping(target = "productId", source = "product.productId")

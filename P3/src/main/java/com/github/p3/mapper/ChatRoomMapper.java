@@ -27,6 +27,7 @@ public interface ChatRoomMapper {
 
         String oppositeNickname = isBuyer ? transaction.getSeller().getUserNickname() : transaction.getBuyer().getUserNickname();
         String oppositeProfileImageUrl = isBuyer ? transaction.getSeller().getProfileImageUrl() : transaction.getBuyer().getProfileImageUrl();
+        String receiverEmail = isBuyer ? transaction.getSeller().getUserEmail() : transaction.getBuyer().getUserEmail(); // ✅ 여기 이름만 맞춰주기!
 
         return new ChatRoomListDto(
                 transaction.getTransactionId(),
@@ -34,7 +35,8 @@ public interface ChatRoomMapper {
                 transaction.getTransactionPrice(),
                 mapProductProfileImageUrl(transaction.getProduct()),
                 oppositeNickname,
-                oppositeProfileImageUrl
+                oppositeProfileImageUrl,
+                receiverEmail
         );
     }
 }
