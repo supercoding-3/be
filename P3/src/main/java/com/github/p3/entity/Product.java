@@ -42,7 +42,7 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductStatus productStatus = ProductStatus.입찰중; // 상품 상태 기본값
+    private ProductStatus productStatus = ProductStatus.BIDDING; // 상품 상태 기본값
 
     @Column(name = "product_created_at", updatable = false)
     private LocalDateTime productCreatedAt = LocalDateTime.now();
@@ -52,7 +52,6 @@ public class Product {
 
     @Column(name = "product_end_date")
     private LocalDateTime productEndDate;
-
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> existingImageUrls; // 기존 이미지 URL 목록

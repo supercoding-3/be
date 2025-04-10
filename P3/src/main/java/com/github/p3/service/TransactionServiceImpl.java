@@ -27,7 +27,7 @@ public class TransactionServiceImpl implements TransactionsService {
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
 
         // Transaction 상태 업데이트
-        transaction.setStatus(TransactionStatus.거래완료);
+        transaction.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(transaction);
 
         // 연관된 Product 가져오기
@@ -37,7 +37,7 @@ public class TransactionServiceImpl implements TransactionsService {
         }
 
         // Product 상태 업데이트
-        product.setProductStatus(ProductStatus.거래완료);
+        product.setProductStatus(ProductStatus.COMPLETED);
         productRepository.save(product);
     }
 }

@@ -39,6 +39,5 @@ public interface ProductMapper {
     Product toEntity(ProductEditDto productEditDto);
 
     // Product -> ProductEditDto 변환 (이 부분을 추가)
-    @Mapping(target = "existingImageUrls", expression = "java(product.getImages().stream().map(image -> image.getImageUrl()).collect(java.util.stream.Collectors.toList()))") // 기존 이미지 URL 매핑
     ProductEditDto toProductEditDto(Product product);  // 추가된 메서드
 }

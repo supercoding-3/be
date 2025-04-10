@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
 @Data
@@ -19,8 +20,14 @@ public class Image {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     @JsonBackReference
+    @ToString.Exclude
     private Product product; // 해당 이미지를 소속한 상품
 
     @Column(nullable = false)
     private String imageUrl; // 이미지 URL
+
+    public Image(String url, Product existingProduct) {
+        this.imageUrl = url;
+        this.product = existingProduct;
+    }
 }

@@ -180,7 +180,7 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         // 거래 상태가 "거래중"일 때만 취소 가능
-        if (transaction.getStatus() != TransactionStatus.거래중) {
+        if (transaction.getStatus() != TransactionStatus.ONGOING) {
             throw new CustomException(ErrorCode.TRANSACTION_NOT_FOUND);
         }
 
@@ -189,7 +189,7 @@ public class MyPageServiceImpl implements MyPageService {
 
         // 상품 상태 업데이트: 입찰중으로 변경
         Product product = transaction.getProduct();
-        product.setProductStatus(ProductStatus.입찰중);
+        product.setProductStatus(ProductStatus.BIDDING);
         productRepository.save(product);
 
 

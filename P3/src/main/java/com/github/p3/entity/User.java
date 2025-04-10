@@ -58,7 +58,7 @@ public class User {
     private Set<Bid> bids;
 
     public boolean hasAward(Long productId) {
-        return bids.stream().anyMatch(bid -> bid.getProduct().getProductId().equals(productId) && bid.getBidStatus() == BidStatus.낙찰);
+        return bids.stream().anyMatch(bid -> bid.getProduct().getProductId().equals(productId) && bid.getBidStatus() == BidStatus.WON);
     }
 
     // 프로필 이미지 URL 필드 추가

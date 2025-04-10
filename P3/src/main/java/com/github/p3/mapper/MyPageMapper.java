@@ -15,7 +15,7 @@ public interface MyPageMapper {
 
     @Mapping(target = "img", expression = "java(product.getImages().isEmpty() ? null : product.getImages().get(0).getImageUrl())")
     @Mapping(target = "price", expression = "java(bid.getBidPrice())")
-    @Mapping(target = "productStatus", expression = "java(isWinningBid ? \"낙찰\" : \"입찰중\")")
+    @Mapping(target = "productStatus", expression = "java(isWinningBid ? \"WON\" : \"BIDDING\")")
     ProductDto toBidProductDto(Product product, Bid bid, boolean isWinningBid);
 
 

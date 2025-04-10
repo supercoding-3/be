@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -28,5 +29,6 @@ public class ProductDetailResponseDto {
     private BidInfoDto latestBid;
     private List<BidInfoDto> allBids; // 모든 입찰 기록
     private Boolean isSeller; // 판매자인지 여부
+    private LocalDateTime productEndDate;
 
 }

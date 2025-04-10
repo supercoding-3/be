@@ -59,15 +59,6 @@ public class ProductController {
         return ResponseEntity.ok(productDetail);
     }
 
-    // 상품 수정 페이지로 이동
-    @GetMapping("/{id}/edit")
-    public ResponseEntity<ProductDetailDto> getProductEdit(@PathVariable("id") Long productId, @AuthenticatedUser User currentUser) {
-        System.out.println("Current User: " + currentUser);
-        // 서비스에서 상품 정보와 권한 체크를 처리
-        ProductDetailDto productDet = productService.getProductInfo(productId, currentUser);
-
-        return ResponseEntity.ok(productDet);  // 상품 수정 페이지로 이동할 때 상품 정보만 반환
-    }
 
     @PatchMapping("/{id}/edit")
     public ResponseEntity<String> updateProduct(
@@ -85,14 +76,12 @@ public class ProductController {
             }
         }
 
-        // 새로운 이미지는 S3에 업로드
-        List<String> newImageUrls = newImages != null ? s3Service.uploadFiles(newImages) : new ArrayList<>();
-
         // 상품 수정 처리
-        productService.updateProduct(productId, productEditDto, newImageUrls, currentUser);
+        productService.updateProduct(productId, productEditDto, newImages, currentUser);
 
         return ResponseEntity.ok("상품 정보가 수정되었습니다.");
     }
+
     @GetMapping("/all")
     public ResponseEntity<List<ProductAllDto>> getAllProducts() {
         // 서비스에서 상품 목록을 가져옴

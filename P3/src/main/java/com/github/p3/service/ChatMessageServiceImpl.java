@@ -40,7 +40,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
         // 거래 중인 상품에 대한 거래 정보 조회
         Transaction transaction = transactionRepository.findByProduct_ProductIdAndStatus(
-                        product.getProductId(), TransactionStatus.거래중)
+                        product.getProductId(), TransactionStatus.ONGOING)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
 
         // 거래 정보에서 구매자와 판매자 조회
