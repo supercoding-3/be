@@ -56,8 +56,11 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Override
     @Transactional
     public void saveMessage(ChatMessageDto chatMessageDto) {
+        // chatRoomId는 transactionId와 동일한 것으로 간주
+        Long chatRoomId = chatMessageDto.getChatRoomId();
+
         // 이미 전달된 거래 ID로 거래 정보 조회
-        Transaction transaction = transactionRepository.findById(chatMessageDto.getTransactionId())
+        Transaction transaction = transactionRepository.findById(chatRoomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
 
         User sender = userRepository.findByUserEmail(chatMessageDto.getSender())
@@ -91,17 +94,6 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                 .map(chatMessageMapper::toChatMessageDto)
                 .collect(Collectors.toList());
     }
-
-    // 채팅 목록 조회
-//    @Override
-//    @Transactional
-//    public List<Long> getActChatRoomIds() {
-//        List<Transaction> activeTransactions = transactionRepository.findByStatus(TransactionStatus.거래중);
-//
-//        return activeTransactions.stream()
-//                .map(Transaction::getTransactionId)
-//                .collect(Collectors.toList());
-//    }
 
     @Transactional
     @Override

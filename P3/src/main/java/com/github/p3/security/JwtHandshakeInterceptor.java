@@ -51,25 +51,32 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
     }
 
     private String getTokenFromRequest(ServerHttpRequest request) {
-        // 1. URL 쿼리 파라미터에서 토큰 추출
+        // 1. URL에서 access_token 가져오기
         String token = getQueryParam(request, "access_token");
-
         if (token != null) {
-            // 2. Cookie 토큰 추출
-            if (request.getHeaders().containsKey("Cookie")) {
-                String cookieHeader = request.getHeaders().getFirst("Cookie");
-                if (cookieHeader != null) {
-                    String[] cookies = cookieHeader.split(";");
-                    for (String cookie : cookies) {
-                        String[] cookieParts = cookie.trim().split("=");
-                        if (cookieParts.length == 2 && "access_token".equals(cookieParts[0])) {
-                            return cookieParts[1];
+            return token; // 쿼리에 있으면 바로 반환
+        }
+
+        // 2. 쿼리에 없으면 Cookie에서 가져오기
+        if (request.getHeaders().containsKey("Cookie")) {
+            String cookieHeader = request.getHeaders().getFirst("Cookie");
+            if (cookieHeader != null) {
+                String[] cookies = cookieHeader.split(";");
+                for (String cookie : cookies) {
+                    cookie = cookie.trim();
+                    int eqIdx = cookie.indexOf("=");
+                    if (eqIdx > 0) { // '='가 포함된 경우만 처리
+                        String key = cookie.substring(0, eqIdx).trim();
+                        String value = cookie.substring(eqIdx + 1).trim();
+                        if ("access_token".equals(key)) {
+                            return value;
                         }
                     }
                 }
             }
         }
-        return token;
+
+        return null; // 토큰이 없으면 null 반환
     }
 
     private String getQueryParam(ServerHttpRequest request, String paramName) {
