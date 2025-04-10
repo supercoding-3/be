@@ -40,7 +40,7 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TransactionStatus status = TransactionStatus.거래중; // 초기 상태
+    private TransactionStatus status = TransactionStatus.ONGOING; // 초기 상태
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "bid_id")

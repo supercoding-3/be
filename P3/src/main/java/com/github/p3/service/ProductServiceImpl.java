@@ -11,16 +11,16 @@ import com.github.p3.mapper.TransactionMapper;
 import com.github.p3.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -35,8 +35,6 @@ public class ProductServiceImpl implements ProductService {
     private final BidMapper bidMapper;
     private final TransactionMapper transactionMapper;
     private final TransactionRepository transactionRepository;
-
-    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
 
     @Override
@@ -122,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void updateProduct(Long productId, ProductEditDto productEditDto, List<String> newImageUrls, User currentUser) {
+    public void updateProduct(Long productId, ProductEditDto productEditDto, List<MultipartFile> newImages, User currentUser) {
         // 기존 상품 조회
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -130,6 +128,17 @@ public class ProductServiceImpl implements ProductService {
         // 현재 사용자가 판매자인지 확인
         if (!existingProduct.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
+        }
+
+
+        // 기존 이미지 삭제 로직
+        List<Image> existingImages = existingProduct.getImages();
+        if (!existingImages.isEmpty()) {
+            for (Image image : existingImages) {
+                s3Service.deleteFileFromS3(image.getImageUrl()); // S3에서 삭제
+            }
+            imageRepository.deleteAll(existingImages); // DB에서 삭제
+            existingProduct.getImages().clear();
         }
 
         // 상품 정보 업데이트 (수정된 필드만 반영)
@@ -152,14 +161,15 @@ public class ProductServiceImpl implements ProductService {
             existingProduct.setProductEndDate(productEditDto.getProductEndDate());
         }
 
-        // 새로운 이미지 추가 (null 체크 후)
-        if (newImageUrls != null && !newImageUrls.isEmpty()) {
-            for (String newImageUrl : newImageUrls) {
-                Image image = new Image();
-                image.setImageUrl(newImageUrl);
-                image.setProduct(existingProduct);
-                imageRepository.save(image); // DB에 저장
-            }
+        // 새로운 이미지 추가
+        if (newImages != null && !newImages.isEmpty()) {
+            List<String> newImageUrls = s3Service.uploadFiles(newImages);
+            List<Image> newImageEntities = newImageUrls.stream()
+                    .map(url -> new Image(url, existingProduct))
+                    .collect(Collectors.toList());
+
+            imageRepository.saveAll(newImageEntities); // DB에 새로운 이미지 저장
+            existingProduct.getImages().addAll(newImageEntities);
         }
 
         // 상품 정보 저장 (수정된 엔티티 저장)
@@ -272,15 +282,15 @@ public class ProductServiceImpl implements ProductService {
         User buyer = bid.getUser();  // 여기서 구매자 정보 추출
 
         // 입찰 상태를 '낙찰'로 변경
-        bid.setBidStatus(BidStatus.낙찰);
+        bid.setBidStatus(BidStatus.WON);
         bidRepository.save(bid);
 
         // 상품 상태를 '낙찰'로 변경
-        product.setProductStatus(ProductStatus.낙찰);
+        product.setProductStatus(ProductStatus.WON);
         productRepository.save(product);
 
         Transaction transaction = transactionMapper.toTransaction(product, buyer, currentUser, bid.getBidPrice(), bid);
-        transaction.setStatus(TransactionStatus.거래중); // 초기 상태 설정
+        transaction.setStatus(TransactionStatus.ONGOING); // 초기 상태 설정
         // 트랜잭션 저장
         transactionRepository.save(transaction);
 

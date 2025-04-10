@@ -25,7 +25,7 @@ public interface ProductService {
     ProductDetailDto getProductInfo(Long productId, User currentUser);
 
 
-    void updateProduct(Long productId, ProductEditDto productEditDto, List<String> newImageUrls, User currentUser);
+    void updateProduct(Long productId, ProductEditDto productEditDto, List<MultipartFile> newImages, User currentUser);
 
     ProductEditDto getProductByProductId(Long productId);
 

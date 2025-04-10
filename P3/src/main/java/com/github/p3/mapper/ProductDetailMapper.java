@@ -18,7 +18,7 @@ public interface ProductDetailMapper {
     @Mapping(target = "latestBid", ignore = true)  // latestBid 필드는 수동으로 처리
     @Mapping(target = "isSeller", ignore = true)  // isSeller 필드는 수동으로 처리
     @Mapping(target = "productStatus", source = "productStatus") // 상품 상태 매핑
-    @Mapping(target = "bidStatus", expression = "java(product.getHighestBidPrice() != null ? BidStatus.입찰중 : BidStatus.입찰없음)") // 입찰 상태 매핑
+    @Mapping(target = "bidStatus", expression = "java(product.getHighestBidPrice() != null ? BidStatus.BIDDING : BidStatus.NO_BID)") // 입찰 상태 매핑
     ProductDetailResponseDto toDto(Product product);
 
 
@@ -47,6 +47,7 @@ public interface ProductDetailMapper {
 
         dto.setImageUrls(imageUrls);
         dto.setIsSeller(isSeller);
+        dto.setProductEndDate(product.getProductEndDate());
 
         // latestBid를 Bid -> BidInfoDto로 변환하여 설정
         BidInfoDto latestBidDto = mapToBidDto(latestBid);
@@ -57,7 +58,7 @@ public interface ProductDetailMapper {
         dto.setAllBids(bidInfoDtos); // BidDto 리스트 설정
 
         dto.setProductStatus(product.getProductStatus()); // 상품 상태 설정
-        dto.setBidStatus(latestBid != null ? BidStatus.입찰중 : BidStatus.입찰없음); // 입찰 상태 설정
+        dto.setBidStatus(latestBid != null ? BidStatus.BIDDING : BidStatus.NO_BID); // 입찰 상태 설정
         return dto;
     }
 }

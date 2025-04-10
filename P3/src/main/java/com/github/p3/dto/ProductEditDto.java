@@ -23,6 +23,4 @@ public class ProductEditDto {
     private BigDecimal immediatePrice;
     private Category category; // enum 타입
     private LocalDateTime productEndDate;
-    private List<String> existingImageUrls; // 기존 이미지 URL
-    private List<MultipartFile> newImages;  // 새로운 이미지 URL 목록
 }

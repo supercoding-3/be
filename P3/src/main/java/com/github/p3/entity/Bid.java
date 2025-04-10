@@ -37,7 +37,7 @@ public class Bid {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BidStatus bidStatus = BidStatus.입찰중; // 입찰 상태 (기본값: 입찰)
+    private BidStatus bidStatus = BidStatus.BIDDING; // 입찰 상태 (기본값: 입찰)
 
     @Column(name = "bid_created_at")
     private LocalDateTime bidCreatedAt = LocalDateTime.now(); // 입찰 시간
