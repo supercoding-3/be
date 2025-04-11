@@ -93,12 +93,6 @@ public class MyPageController {
         }
     }
 
-    @GetMapping("/my-page/edit")
-    public ResponseEntity<Map<String, String>> showUserEditPage() {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "회원정보 수정 페이지로 이동합니다.");
-        return ResponseEntity.ok(response);
-    }
 
     @PostMapping("/my-page/edit/profile")
     public ResponseEntity<String> updateUserProfile(
