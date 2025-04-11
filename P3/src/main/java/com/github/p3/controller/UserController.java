@@ -3,6 +3,7 @@ package com.github.p3.controller;
 import com.github.p3.dto.UserDto;
 import com.github.p3.entity.User;
 import com.github.p3.exception.CustomException;
+import com.github.p3.exception.ErrorResponse;
 import com.github.p3.mapper.UserMapper;
 import com.github.p3.security.JwtTokenProvider;
 import com.github.p3.service.UserService;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.Map;
 
@@ -35,9 +35,11 @@ public class UserController {
             UserDto createdUser = userService.signup(userDto);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         } catch (CustomException e) {
-            return new ResponseEntity<>(e.getMessage(), e.getErrorCode().getStatus());
+            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode()), e.getErrorCode().getStatus());
         } catch (Exception e) {
-            return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", "Internal Server Error"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -53,41 +55,29 @@ public class UserController {
             UserDto responseDto = userMapper.toUserDto(user);
 
             // Access Token 쿠키 설정
-            Cookie accessTokenCookie = new Cookie("access_token", tokens.get("access_token"));
-            accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge(3600);
-            accessTokenCookie.setSecure(true);  // HTTPS에서만 쿠키 전송
-
-            // SameSite 속성 수동 설정
             response.addHeader("Set-Cookie", "access_token=" + tokens.get("access_token") +
-                    "; HttpOnly; Secure; Path=/; Max-Age=3600" + "; SameSite=None");
+                    "; HttpOnly; Secure; Path=/; Max-Age=3600; SameSite=None");
 
-            log.info("로그인 성공: 이메일={}, 액세스 토큰={}", userDto.getUserEmail(), accessTokenCookie.getValue());
+            log.info("로그인 성공: 이메일={}, 액세스 토큰={}", userDto.getUserEmail(), tokens.get("access_token"));
             return ResponseEntity.ok(responseDto);
         } catch (CustomException e) {
             log.warn("로그인 실패: {}", e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), e.getErrorCode().getStatus());
+            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode()), e.getErrorCode().getStatus());
         } catch (Exception e) {
             log.error("로그인 중 서버 오류 발생", e);
-            return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", "Internal Server Error"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        log.info("로그아웃 요청: {}", request.getRequestURI());  // 요청 URI 확인
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        log.info("로그아웃 요청: {}", request.getRequestURI());
 
         try {
             // Access Token 쿠키 만료
-            Cookie accessTokenCookie = new Cookie("access_token", null);
-            accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge(0);
-            accessTokenCookie.setSecure(true);  // HTTPS에서만 쿠키 전송
-
-            // SameSite 속성 수동 설정
             response.addHeader("Set-Cookie", "access_token=null; HttpOnly; Secure; Path=/; Max-Age=0; SameSite=None");
 
             // 리프래시 토큰 삭제 (DB)
@@ -97,24 +87,28 @@ public class UserController {
             return new ResponseEntity<>("로그아웃 성공", HttpStatus.OK);
         } catch (CustomException e) {
             log.warn("로그아웃 실패: {}", e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), e.getErrorCode().getStatus());
+            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode()), e.getErrorCode().getStatus());
         } catch (Exception e) {
             log.error("로그아웃 중 서버 오류 발생", e);
-            return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", "Internal Server Error"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 계정 비활성화
     @PatchMapping("/deactivate")
-    public ResponseEntity<String> deactivateAccount(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> deactivateAccount(@RequestBody UserDto userDto) {
         try {
             userService.deactivateAccount(userDto.getUserEmail(), userDto.getUserPassword());
             return new ResponseEntity<>("계정이 비활성화되었습니다.", HttpStatus.OK);
         } catch (CustomException e) {
-            return new ResponseEntity<>(e.getMessage(), e.getErrorCode().getStatus());
+            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode()), e.getErrorCode().getStatus());
         } catch (Exception e) {
             log.error("계정 비활성화 중 서버 오류 발생", e);
-            return new ResponseEntity<>("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", "Internal Server Error"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -133,7 +127,7 @@ public class UserController {
                     log.info("로그인 상태 확인: true");
                     return ResponseEntity.ok(responseDto);
                 } else {
-                    return ResponseEntity.ok(false); // 사용자 정보 없으면 false
+                    return ResponseEntity.ok(false);
                 }
             } else {
                 log.info("로그인 상태 확인: false");
@@ -141,7 +135,9 @@ public class UserController {
             }
         } catch (Exception e) {
             log.error("로그인 확인 중 오류 발생", e);
-            return ResponseEntity.ok(false);
+            return new ResponseEntity<>(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "로그인 상태 확인 중 오류가 발생했습니다.", "Internal Server Error"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -155,5 +151,4 @@ public class UserController {
         }
         return null;
     }
-
 }
