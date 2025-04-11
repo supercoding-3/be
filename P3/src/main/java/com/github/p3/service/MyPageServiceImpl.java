@@ -243,10 +243,11 @@ public class MyPageServiceImpl implements MyPageService {
             user.setUserPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
-        // 이메일, 닉네임, 전화번호 등 다른 정보 수정
-        if (dto.getEmail() != null) {
-            user.setUserEmail(dto.getEmail());
+        if (dto.getEmail() != null ) {
+            throw new CustomException(ErrorCode.EMAIL_CHANGE_NOT_ALLOWED);
         }
+
+        // 닉네임, 전화번호 등 다른 정보 수정
         if (dto.getNickname() != null) {
             user.setUserNickname(dto.getNickname());
         }

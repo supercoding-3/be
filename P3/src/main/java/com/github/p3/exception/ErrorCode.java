@@ -51,7 +51,8 @@ public enum ErrorCode {
     CHAT_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 메시지를 찾을 수 없습니다."),
 
     // 거래
-    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND,"거래중이 아니거나 거래가 완료된 상품입니다.");
+    TRANSACTION_NOT_FOUND(HttpStatus.NOT_FOUND,"거래중이 아니거나 거래가 완료된 상품입니다."),
+    EMAIL_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "이메일은 변경이 불가합니다.");
 
     private final HttpStatus status;
     private final String message;
