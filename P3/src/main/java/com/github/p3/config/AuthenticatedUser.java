@@ -8,4 +8,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)  // 매개변수에 적용될 어노테이션
 @Retention(RetentionPolicy.RUNTIME)  // 런타임에 유지되는 어노테이션
 public @interface AuthenticatedUser {
+    boolean required() default true;
 }

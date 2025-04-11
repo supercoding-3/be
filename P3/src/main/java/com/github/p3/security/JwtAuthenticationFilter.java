@@ -18,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,83 +29,72 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    private static final List<String> WHITELIST_URLS = List.of(
+            "/api/user/login",
+            "/api/user/check-login",
+            "/api/user/signup",
+            "/swagger-ui/index.html"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        return WHITELIST_URLS.contains(uri)
+                || uri.startsWith("/api/products/all")
+                || uri.matches("/api/products/\\d+")
+                || uri.matches("/api/products/category/[A-Z]+")
+                || uri.startsWith("/api/products/search")
+                || uri.startsWith("/v3/api-docs")
+                || uri.startsWith("/swagger-ui");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
-            throws IOException, ServletException {
-
-        // 특정 URL은 필터에서 제외
-        if (request.getRequestURI().equals("/api/user/login") ||
-                request.getRequestURI().equals("/api/user/check-login") ||
-                request.getRequestURI().equals("/api/user/signup") ||
-                request.getRequestURI().startsWith("/api/products/all") ||
-                request.getRequestURI().startsWith("/api/products/{id}") ||
-                request.getRequestURI().startsWith("/api/products/category/{category}") ||
-                request.getRequestURI().startsWith("/api/products/search") ||
-                request.getRequestURI().startsWith("/v3/api-docs") ||
-                request.getRequestURI().startsWith("/swagger-ui") ||
-                request.getRequestURI().equals("/swagger-ui/index.html")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+            throws ServletException, IOException {
 
         try {
             String accessToken = getTokenFromRequest(request);
             log.debug("요청 URI: {}, 추출된 액세스 토큰: {}", request.getRequestURI(), accessToken);
 
             if (accessToken != null) {
-                processAccessToken(request, response, accessToken);
+                handleAccessToken(request, response, accessToken);
+                filterChain.doFilter(request, response);
             } else {
                 log.warn("요청에 유효한 액세스 토큰이 포함되어 있지 않습니다.");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 액세스 토큰.");
-                return;
             }
 
-            filterChain.doFilter(request, response);
         } catch (Exception e) {
             log.error("필터 처리 중 오류 발생: {}", e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
         }
     }
 
-    // 액세스 토큰 처리
-    private void processAccessToken(HttpServletRequest request, HttpServletResponse response, String accessToken) throws IOException {
-        // 1. 액세스 토큰이 만료되었는지 먼저 확인
+    private void handleAccessToken(HttpServletRequest request, HttpServletResponse response, String accessToken) throws IOException {
         if (jwtTokenProvider.isTokenExpired(accessToken)) {
             log.info("액세스 토큰이 만료되었습니다. 리프레시 토큰 처리 시작...");
-            String refreshToken = getRefreshTokenFromRequest(request);
-
-            if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
-                log.info("유효한 리프레시 토큰입니다. 새 액세스 토큰을 생성합니다.");
-
-                String newAccessToken = jwtTokenProvider.refreshAccessToken(refreshToken);
-                storeNewAccessTokenInCookie(response, newAccessToken);
-                setAuthenticationFromAccessToken(newAccessToken);
-                return;
-            } else {
-                log.warn("유효하지 않은 리프레시 토큰입니다.");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다.");
-                return;
-            }
-        }
-
-        // 2. 만료되지 않았다면 기존 검증 로직 실행
-        if (jwtTokenProvider.validateToken(accessToken)) {
+            processRefreshToken(request, response, accessToken);
+        } else if (jwtTokenProvider.validateToken(accessToken)) {
             setAuthenticationFromAccessToken(accessToken);
         } else {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "액세스 토큰이 유효하지 않습니다.");
         }
     }
 
-    // 새 액세스 토큰을 쿠키에 저장
-    private void storeNewAccessTokenInCookie(HttpServletResponse response, String newAccessToken) {
-        Cookie newAccessTokenCookie = new Cookie("access_token", newAccessToken);
-        newAccessTokenCookie.setHttpOnly(true);
-        newAccessTokenCookie.setPath("/");
-        response.addCookie(newAccessTokenCookie);
-        log.debug("새로운 액세스 토큰이 쿠키에 저장되었습니다.");
+    private void processRefreshToken(HttpServletRequest request, HttpServletResponse response, String expiredAccessToken) throws IOException {
+        String refreshToken = getRefreshTokenFromRequest(expiredAccessToken);
+
+        if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
+            String newAccessToken = jwtTokenProvider.refreshAccessToken(refreshToken);
+            storeAccessTokenInCookie(response, newAccessToken);
+            setAuthenticationFromAccessToken(newAccessToken);
+        } else {
+            log.warn("리프레시 토큰이 유효하지 않습니다.");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다.");
+        }
     }
 
-    // SecurityContext에 인증 정보 설정
     private void setAuthenticationFromAccessToken(String accessToken) {
         String userEmail = jwtTokenProvider.extractUserEmail(accessToken);
         if (userEmail != null) {
@@ -120,12 +110,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    // 요청에서 액세스 토큰 가져오기
+    private void storeAccessTokenInCookie(HttpServletResponse response, String accessToken) {
+        Cookie cookie = new Cookie("access_token", accessToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        log.debug("새로운 액세스 토큰이 쿠키에 저장되었습니다.");
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         return getTokenFromCookie(request).orElse(getTokenFromQueryParam(request));
     }
 
-    // 쿠키에서 액세스 토큰 가져오기
     private Optional<String> getTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -137,27 +133,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return Optional.empty();
     }
 
-    // 쿼리 파라미터에서 액세스 토큰 가져오기
     private String getTokenFromQueryParam(HttpServletRequest request) {
         String token = request.getParameter("access_token");
         return (token != null && !token.isEmpty()) ? token : null;
     }
 
-    // 요청에서 리프레시 토큰 가져오기
-    private String getRefreshTokenFromRequest(HttpServletRequest request) {
-        String accessToken = getTokenFromRequest(request);
-        if (accessToken == null) {
-            log.warn("요청에 액세스 토큰이 포함되어 있지 않습니다.");
-            return null;
-        }
-
+    private String getRefreshTokenFromRequest(String accessToken) {
         String userEmail = jwtTokenProvider.extractUserEmail(accessToken);
         if (userEmail != null) {
             return refreshTokenRepository.findByUserEmail(userEmail)
                     .map(RefreshToken::getRefreshToken)
                     .orElse(null);
         }
-        log.warn("액세스 토큰에서 이메일을 추출할 수 없습니다.");
         return null;
     }
 }

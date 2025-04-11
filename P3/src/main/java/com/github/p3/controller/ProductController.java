@@ -54,7 +54,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable("id") Long productId, @AuthenticatedUser User currentUser) {
+    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable("id") Long productId, @AuthenticatedUser(required = false) User currentUser) {
         ProductDetailResponseDto productDetail = productService.getProductDetail(productId, currentUser);
         return ResponseEntity.ok(productDetail);
     }

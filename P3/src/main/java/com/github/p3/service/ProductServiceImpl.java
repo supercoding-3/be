@@ -64,7 +64,10 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 현재 사용자가 판매자인지 여부 확인
-        boolean isSeller = product.getUser().getUserId().equals(currentUser.getUserId());
+        boolean isSeller = false;
+        if (currentUser != null && currentUser.getUserId() != null) {
+            isSeller = product.getUser().getUserId().equals(currentUser.getUserId());
+        }
 
         // 최신 입찰 조회
         Bid latestBid = bidRepository.findTopByProductProductIdOrderByBidCreatedAtDesc(productId).orElse(null);
