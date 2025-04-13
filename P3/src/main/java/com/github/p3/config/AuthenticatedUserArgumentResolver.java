@@ -21,8 +21,8 @@ public class AuthenticatedUserArgumentResolver implements HandlerMethodArgumentR
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        // User 타입의 파라미터만 처리
-        return parameter.getParameterType().equals(User.class);
+        // @AuthenticatedUser 어노테이션이 붙은 파라미터일 때만 처리
+        return parameter.hasParameterAnnotation(AuthenticatedUser.class);
     }
 
     @Override
@@ -32,23 +32,10 @@ public class AuthenticatedUserArgumentResolver implements HandlerMethodArgumentR
             NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory) throws Exception {
 
-        AuthenticatedUser annotation = parameter.getParameterAnnotation(AuthenticatedUser.class);
-        boolean required = annotation == null || annotation.required(); // 기본값 true
+        // SecurityContext에서 현재 인증된 사용자의 이름(email) 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication.getPrincipal().equals("anonymousUser")) {
-            if (required) {
-                throw new RuntimeException("로그인이 필요합니다.");
-            } else {
-                return null; // 로그인 안 된 사용자 허용
-            }
-        }
-
-        String email = authentication.getName();
-
-        return userRepository.findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // UserRepository를 통해 사용자 정보 조회
+        return userRepository.findByUserEmail(username).orElse(null);
     }
 }

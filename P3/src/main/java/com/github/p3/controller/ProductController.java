@@ -30,14 +30,6 @@ public class ProductController {
     private final S3Service s3Service;
 
 
-    @GetMapping("/register")
-    public ResponseEntity<Map<String, String>> showProductRegisterPage() {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "상품 등록 페이지로 이동합니다.");
-        return ResponseEntity.ok(response);
-    }
-
-
     @PostMapping("/register")
     public ResponseEntity<String> registerProduct(
             @RequestPart("product") ProductRegisterDto productRegisterDto,
@@ -54,7 +46,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable("id") Long productId, @AuthenticatedUser(required = false) User currentUser) {
+    public ResponseEntity<ProductDetailResponseDto> getProductDetail(@PathVariable("id") Long productId, @AuthenticatedUser User currentUser) {
+        log.info("현재 사용자: {}", currentUser);
         ProductDetailResponseDto productDetail = productService.getProductDetail(productId, currentUser);
         return ResponseEntity.ok(productDetail);
     }
