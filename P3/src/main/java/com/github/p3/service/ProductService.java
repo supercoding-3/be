@@ -6,6 +6,8 @@ import com.github.p3.entity.Category;
 import com.github.p3.entity.Product;
 import com.github.p3.entity.User;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,9 +20,9 @@ public interface ProductService {
 
     ProductDetailResponseDto getProductDetail(Long productId, User currentUser);
 
-    List<ProductAllDto> getAllProducts();
+    Page<ProductAllDto> getAllProducts(Pageable pageable);
 
-    List<CategoryDto> getProductsByCategory(Category category);
+    Page<CategoryDto> getProductsByCategory(Category category, Pageable pageable);
 
     ProductDetailDto getProductInfo(Long productId, User currentUser);
 

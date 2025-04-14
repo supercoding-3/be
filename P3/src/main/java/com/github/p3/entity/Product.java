@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Table(name = "products")
-public class Product {
+public class Product extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,12 +43,6 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus productStatus = ProductStatus.BIDDING; // 상품 상태 기본값
-
-    @Column(name = "product_created_at", updatable = false)
-    private LocalDateTime productCreatedAt = LocalDateTime.now();
-
-    @Column(name = "product_updated_at")
-    private LocalDateTime productUpdatedAt = LocalDateTime.now();
 
     @Column(name = "product_end_date")
     private LocalDateTime productEndDate;
@@ -83,10 +77,6 @@ public class Product {
         return null;  // 입찰이 없으면 null 반환
     }
 
-    @PreUpdate
-    public void updateTimestamp() {
-        this.productUpdatedAt = LocalDateTime.now();
-    }
 
 }
 

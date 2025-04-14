@@ -8,16 +8,19 @@ import com.github.p3.service.S3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.github.p3.config.AuthenticatedUser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/products")
@@ -76,9 +79,11 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ProductAllDto>> getAllProducts() {
+    public ResponseEntity<Page<ProductAllDto>> getAllProducts(
+            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         // 서비스에서 상품 목록을 가져옴
-        List<ProductAllDto> products = productService.getAllProducts();
+        Page<ProductAllDto> products = productService.getAllProducts(pageable);
 
         // ResponseEntity로 감싸서 반환
         return ResponseEntity.ok(products); // 200 OK 상태 코드와 함께 반환
@@ -86,8 +91,10 @@ public class ProductController {
 
     // 카테고리별 상품 조회
     @GetMapping("/category/{category}")
-    public List<CategoryDto> getProductsByCategory(@PathVariable("category") Category category) {
-        return productService.getProductsByCategory(category);
+    public ResponseEntity<Page<CategoryDto>> getProductsByCategory(@PathVariable("category") Category category,
+                                                                   @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable){
+        Page<CategoryDto> products = productService.getProductsByCategory(category, pageable);
+        return ResponseEntity.ok(products);
     }
 
     // 상품 삭제
