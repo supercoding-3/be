@@ -12,6 +12,8 @@ import com.github.p3.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -86,21 +88,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public List<ProductAllDto> getAllProducts() {
+    public Page<ProductAllDto> getAllProducts(Pageable pageable) {
         // 모든 상품을 조회하고, DTO로 변환
-        return productRepository.findAll().stream()
-                .map(productMapper::toProductAllDto)
-                .collect(Collectors.toList());
+        return productRepository.findAll(pageable)
+                .map(productMapper::toProductAllDto);
     }
 
 
     // 카테고리별 상품 조회
     @Override
     @Transactional
-    public List<CategoryDto> getProductsByCategory(Category category) {
-        return productRepository.findByCategory(category).stream()
-                .map(productMapper::toCategoryDto)  // MapStruct를 사용하여 변환
-                .collect(Collectors.toList());
+    public Page<CategoryDto> getProductsByCategory(Category category,Pageable pageable) {
+        Page<Product> productPage = productRepository.findByCategory(category, pageable);
+
+        return productPage.map(productMapper::toCategoryDto);
     }
 
     @Override
