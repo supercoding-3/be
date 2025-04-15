@@ -68,11 +68,8 @@ public class MyPageController {
         // 입찰 취소 처리 로직
         boolean isCancelled = myPageService.cancelBid(bidId, userId);
 
-        if (isCancelled) {
-            return ResponseEntity.ok("입찰이 취소되었습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("입찰 취소 실패");
-        }
+        return ResponseEntity.ok("입찰이 취소되었습니다.");
+
     }
 
     // 거래 취소 요청 처리
@@ -86,11 +83,7 @@ public class MyPageController {
         // 거래 취소 처리
         boolean isCancelled = myPageService.cancelTransaction(transactionId, sellerId);
 
-        if (isCancelled) {
             return ResponseEntity.ok("낙찰 취소가 완료되었습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("낙찰 취소 실패");
-        }
     }
 
 
