@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     public void registerProduct(ProductRegisterDto productRegisterDto, List<String> imageUrls, User currentUser) {
         // ProductRegisterDto -> Product 변환 (User 포함)
         Product product = productMapper.toEntity(productRegisterDto);
-        product.setUser(currentUser);  // 사용자 정보 설정
+        product.assignUser(currentUser);  // 사용자 정보 설정
 
         // 상품 저장
         productRepository.save(product);
@@ -62,18 +62,17 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDetailResponseDto getProductDetail(Long productId, User currentUser) {
         // 상품 조회
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findByIdOrElseThrow(productId);
 
         // 현재 사용자가 판매자인지 여부 확인 (currentUser가 null이면 false)
         boolean isSeller = currentUser != null &&
                 product.getUser().getUserId().equals(currentUser.getUserId());
 
         // 최신 입찰 조회
-        Bid latestBid = bidRepository.findTopByProductProductIdOrderByBidCreatedAtDesc(productId).orElse(null);
+        Bid latestBid = bidRepository.findTopByProductProductIdOrderByCreatedAtDesc(productId).orElse(null);
 
         // 모든 입찰 목록 조회
-        List<Bid> allBids = bidRepository.findByProductProductIdOrderByBidCreatedAtDesc(productId);
+        List<Bid> allBids = bidRepository.findByProductProductIdOrderByCreatedAtDesc(productId);
 
 
         // 상품에 속한 이미지 조회
@@ -108,8 +107,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDetailDto getProductInfo(Long productId, User currentUser) {
         // 상품 조회
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findByIdOrElseThrow(productId);
 
         // 현재 사용자가 판매자인지 확인
         if (!product.getUser().getUserId().equals(currentUser.getUserId())) {
@@ -124,14 +122,12 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void updateProduct(Long productId, ProductEditDto productEditDto, List<MultipartFile> newImages, User currentUser) {
         // 기존 상품 조회
-        Product existingProduct = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product existingProduct = productRepository.findByIdOrElseThrow(productId);
 
         // 현재 사용자가 판매자인지 확인
         if (!existingProduct.getUser().getUserId().equals(currentUser.getUserId())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);  // 권한이 없는 경우 예외 처리
         }
-
 
         // 기존 이미지 삭제 로직
         List<Image> existingImages = existingProduct.getImages();
@@ -182,8 +178,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductEditDto getProductByProductId(Long productId) {
         // 상품을 DB에서 찾기
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findByIdOrElseThrow(productId);
 
         // Product -> ProductEditDto로 변환하여 반환
         return productMapper.toProductEditDto(product);
@@ -193,8 +188,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public boolean deleteProduct(Long productId, User currentUser) {
         // 상품 조회
-        Product existingProduct = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product existingProduct = productRepository.findByIdOrElseThrow(productId);
 
         // 현재 사용자가 판매자인지 확인
         if (!existingProduct.getUser().getUserId().equals(currentUser.getUserId())) {
@@ -219,8 +213,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void bidProduct(Long productId, String userEmail, BidDto bidDto) {
         // 상품 조회
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findByIdOrElseThrow(productId);
 
         // userId로 User 객체 조회
         User user = userRepository.findByUserEmail(userEmail)
@@ -263,8 +256,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void completedTransaction(Long productId, Long bidId, User currentUser) {
         // 상품 조회
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findByIdOrElseThrow(productId);
 
         // 현재 사용자가 판매자인지 확인
         if (!product.getUser().getUserId().equals(currentUser.getUserId())) {
@@ -284,15 +276,15 @@ public class ProductServiceImpl implements ProductService {
         User buyer = bid.getUser();  // 여기서 구매자 정보 추출
 
         // 입찰 상태를 '낙찰'로 변경
-        bid.setBidStatus(BidStatus.WON);
+        bid.markAsWon();
         bidRepository.save(bid);
 
         // 상품 상태를 '낙찰'로 변경
-        product.setProductStatus(ProductStatus.WON);
+        product.markAsWon();
         productRepository.save(product);
 
         Transaction transaction = transactionMapper.toTransaction(product, buyer, currentUser, bid.getBidPrice(), bid);
-        transaction.setStatus(TransactionStatus.ONGOING); // 초기 상태 설정
+        transaction.begin(); // 초기 상태 설정
         // 트랜잭션 저장
         transactionRepository.save(transaction);
 

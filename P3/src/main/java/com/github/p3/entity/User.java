@@ -64,4 +64,8 @@ public class User {
     // 프로필 이미지 URL 필드 추가
     private String profileImageUrl;
 
+    public void updateImage(String newImageUrl){
+        this.profileImageUrl = newImageUrl;
+    }
+
 }

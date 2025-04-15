@@ -45,4 +45,13 @@ public class Transaction {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "bid_id")
     private Bid bid;
+
+    public void begin(){
+        this.status = TransactionStatus.ONGOING;
+    }
+
+    public void markAsCompleted(){
+        this.status = TransactionStatus.COMPLETED;
+    }
+
 }

@@ -4,8 +4,7 @@ package com.github.p3.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 import java.math.BigDecimal;
@@ -77,6 +76,17 @@ public class Product extends BaseEntity{
         return null;  // 입찰이 없으면 null 반환
     }
 
+    public void markAsWon() {
+        this.productStatus = ProductStatus.WON;
+    }
+
+    public void markAsCompleted(){
+        this.productStatus = ProductStatus.COMPLETED;
+    }
+
+    public void assignUser(User user) {
+        this.user = user;
+    }
 
 }
 

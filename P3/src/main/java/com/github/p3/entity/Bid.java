@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Table(name = "bids")
-public class Bid {
+public class Bid extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,15 +39,14 @@ public class Bid {
     @Column(nullable = false)
     private BidStatus bidStatus = BidStatus.BIDDING; // 입찰 상태 (기본값: 입찰)
 
-    @Column(name = "bid_created_at")
-    private LocalDateTime bidCreatedAt = LocalDateTime.now(); // 입찰 시간
-
-    @Column(name = "bid_updated_at")
-    private LocalDateTime bidUpdatedAt = LocalDateTime.now(); // 입찰 업데이트 시간
 
     @Column(name = "bid_canceled_at")
     private LocalDateTime bidCanceledAt; // 입찰 취소 시간 (입찰 취소 시 기록)
 
     @OneToMany(mappedBy = "bid")
     private List<Transaction> transactions;  // Bid와 관련된 거래들
+
+    public void markAsWon() {
+        this.bidStatus = bidStatus.WON;
+    }
 }

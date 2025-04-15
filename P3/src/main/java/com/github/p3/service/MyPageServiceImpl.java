@@ -220,7 +220,7 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         // 새 이미지 URL 저장
-        user.setProfileImageUrl(newImageUrl);
+        user.updateImage(newImageUrl);
 
         // 변경된 유저 정보 저장
         userRepository.save(user);

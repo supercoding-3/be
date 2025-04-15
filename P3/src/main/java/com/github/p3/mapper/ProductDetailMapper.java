@@ -31,7 +31,7 @@ public interface ProductDetailMapper {
         dto.setBidId(bid.getBidId());
         dto.setUserNickname(bid.getUser().getUserNickname()); // User 엔티티에서 닉네임 가져오기
         dto.setBidPrice(bid.getBidPrice());
-        dto.setBidCreatedAt(bid.getBidCreatedAt());
+        dto.setBidCreatedAt(bid.getCreatedAt());
         return dto;
     }
 

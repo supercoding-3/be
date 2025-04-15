@@ -2,6 +2,8 @@ package com.github.p3.repository;
 
 import com.github.p3.entity.Category;
 import com.github.p3.entity.Product;
+import com.github.p3.exception.CustomException;
+import com.github.p3.exception.ErrorCode;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +23,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByTitleContainingIgnoreCase(String title);
 
     List<Product> findByUser_UserId(Integer userId);
+
+    default Product findByIdOrElseThrow(Long id){
+        return findById(id)
+                .orElseThrow(()-> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
 }
+
